@@ -274,6 +274,25 @@ function waterMultiple(wallet, seedIDs, totalWaterNeeded) {
 }
 
 
+function getSeedListForRegion(regionName) {
+    if (regionName === 'Asia') {
+        return ['Aceh','Thai','Chocolate Thai']
+    } else if (regionName === 'Jamaica') {
+        return ['Lambs Bread','Kings Bread']
+    } else if (regionName === 'Africa') {
+        return ['Swazi Gold','Kilimanjaro','Durban Poison','Malawi']
+    } else if (regionName === 'Afghanistan') {
+        return ['Hindu Kush','Afghani Kush','Lashkar Gah','Mazar I Sharif']
+    } else if (regionName === 'Mexico') {
+        return ['Acapulco Gold']
+    } else if (regionName === 'South America') {
+        return ['Colombian Gold','Panama Red']
+    } else {
+        return []
+    }
+}
+
+
 Promise.all([getOwnedPlots(ACCOUNT),getRentedPlots(ACCOUNT),getSeeds(ACCOUNT)]).then( (values) => {
     let [ownedPlots, rentedPlots, seeds] = values
 
@@ -285,12 +304,20 @@ Promise.all([getOwnedPlots(ACCOUNT),getRentedPlots(ACCOUNT),getSeeds(ACCOUNT)]).
     let table_markup = `<thead><th>id</th><th>Region</th><th>Rented To</th><th>Seed ID</th><th>Planted Seed</th><th>Water</th><th>Yield</th><th>Time Left</th><th colspan="3">${waterAllBtn}<br>${harvestAllBtn}<br>Actions</th>`
 
     var seedsByID = {}
+    var seedsByName = {}
     var seedsReady = []
     var seedsNeedWater = []
+    var plantedSeedIDs = []
+
     var totalWaterNeeded = 0
+
+    // build dictionaries of available seeds by name and by ID
+    // also build a list of seeds that are ready to harvest, for the "harvest all" button
     for (seed of seeds) {
         seedsByID[seed._id] = seed
         //console.log(seed)
+
+        seedsByName[seed.properties.NAME] = seed
 
         let seedTime  = seed.properties.SPT
         if (seedTime === 0) {
@@ -298,9 +325,17 @@ Promise.all([getOwnedPlots(ACCOUNT),getRentedPlots(ACCOUNT),getSeeds(ACCOUNT)]).
         }
     }
 
+    // build a list of the seeds that have already been planted, so we don't try to plant one again
+    for (plot of allPlots) {
+        let plantedSeedID = plot.properties.SEEDID
+        plantedSeedIDs.push(plantedSeedID)
+    }
+
     for (plot of allPlots) {
         //console.log(plot)
         let plantedSeedID = plot.properties.SEEDID
+
+        let regionName = plot.properties.NAME
 
         let seedName  = ''
         let seedWater = ''
@@ -313,9 +348,8 @@ Promise.all([getOwnedPlots(ACCOUNT),getRentedPlots(ACCOUNT),getSeeds(ACCOUNT)]).
 
         let isRented = plot.properties.RENTED & plot.properties.RENTED === true
         let rentedTo = plot.properties.RENTEDINFO
-        console.log(isRented)
-        console.log(rentedTo)
 
+        // if the plot is occupied
         if (plot.properties.SEEDID != 0 && seedsByID[plot.properties.SEEDID] !== undefined) {
             seedName  = seedsByID[plantedSeedID].properties.NAME
             seedWater = seedsByID[plantedSeedID].properties.WATER
@@ -328,26 +362,38 @@ Promise.all([getOwnedPlots(ACCOUNT),getRentedPlots(ACCOUNT),getSeeds(ACCOUNT)]).
                 waterBtn = ''//`<button title="Water" class="btn btn-primary"><i class="fa-solid fa-hand-holding-droplet"></i></button>`
             }
 
+            // if it's ready to harvest, show a harvest button
             if (seedTime === 0) {
                 harvestBtn = `<button title="Harvest" class="btn btn-success" onClick="harvestSingle('${ACCOUNT}',${plantedSeedID})"><i class="fa-solid fa-scissors"></i></button>`
             }
         } else {
+            // if the plot is unoccupied and plantable, show the list of possible seeds
             if (!isRented || (isRented && rentedTo === ACCOUNT)) {
-                plantBtn = '<button title="Plant" class="btn btn-secondary btn-outline" disabled="disabled"><i class="fa-solid fa-seedling"></i></button>'
+                plantBtn = '<button title="Plant" class="btn btn-secondary" disabled="disabled"><i class="fa-solid fa-seedling"></i></button>'
+
+                seedList = ''
+                for (seedName of getSeedListForRegion(regionName)) {
+                    for (seedID in seedsByID) {
+                        if (seedsByID[seedID].properties.NAME === seedName && !plantedSeedIDs.includes(seedID) && seedsByID[seedID].properties.WATER !== 0) {
+                            seedList += `<a class="dropdown-item" href="#">${seedName} - ${seedID}</a>`
+                            console.log(seedsByID[seedID])
+                        }
+                    }
+                }
+
                 seedName = `<div class="dropdown">
-              <button class="btn btn-secondary dropdown-toggle btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" disabled="disabled">
+              <button class="btn btn-secondary dropdown-toggle btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 Select Seed
               </button>
               <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                <a class="dropdown-item" href="#">Seed 1</a>
-                <a class="dropdown-item" href="#">Seed 2</a>
-                <a class="dropdown-item" href="#">Seed 3</a>
+                ${seedList}
               </div>
             </div>`
             }
             
         }
 
+        // Show "empty" if the plot is unoccupied
         if (plantedSeedID == 0) {
             plantedSeedID = 'Empty'
         }
@@ -355,13 +401,15 @@ Promise.all([getOwnedPlots(ACCOUNT),getRentedPlots(ACCOUNT),getSeeds(ACCOUNT)]).
         table_markup += `<tr><td>${plot._id}</td><td>${plot.properties.NAME}</td><td>${rentedTo ? rentedTo: 'n/a'}</td><td>${plantedSeedID}</td><td>${seedName}</td><td>${seedWater}</td><td>${seedYield}</td><td>${seedTime}</td><td>${plantBtn}</td><td>${waterBtn}</td><td>${harvestBtn}</td></tr>`
     }
 
-
+    // paint the main table
     document.querySelector('table#plots_table').innerHTML = table_markup
 
+    // add click handler for harvest-all button
     document.querySelector('button#harvest-all').onclick = function () {
         harvestMultiple(ACCOUNT,seedsReady)
     }
 
+    // add click handler for water-all button
     document.querySelector('button#water-all').onclick = function () {
         waterMultiple(ACCOUNT,seedsNeedWater,totalWaterNeeded)
     }
