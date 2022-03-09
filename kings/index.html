@@ -17,13 +17,13 @@
     <table class="table table-sm" id="stats">
         <!--<thead><th>Attribute</th><th>Value</th></thead>-->
     </table>
-    <h2>Your Plots</h2><br>
+    <h2>HashKings Plots</h2><br>
     <table id="plots_table" class="table table-striped">
 
     </table>
 
     
-        <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
+    <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
     <div class="col-md-4 d-flex align-items-center">
 
       <span class="text-muted">Brought to you by <a href="https://peakd.com/@HiveTrending">@hivetrending</a> and the <a href="https://vote.hive.uno/@pizza.witness">@pizza.witness</a> team.</span>
@@ -122,15 +122,16 @@ Promise.all([getOwnedPlots(ACCOUNT),getRentedPlots(ACCOUNT),getSeeds(ACCOUNT)]).
 
     let allPlots = ownedPlots.concat(rentedPlots)
 
-    let table_markup = '<thead><th>id</th><th>Region</th><th>Occupied</th><th>Rented</th><th>Seed ID</th><th>Planted Seed</th><th>Water</th><th>Yield</th>'
+    let table_markup = '<thead><th>id</th><th>Region</th><th>Rented</th><th>Seed ID</th><th>Planted Seed</th><th>Water</th><th>Yield</th>'
 
     var seedsByID = {}
     for (seed of seeds) {
         seedsByID[seed._id] = seed
+        //console.log(seed)
     }
 
     for (plot of allPlots) {
-        //console.log(plot)
+        console.log(plot)
         let plantedSeedID = plot.properties.SEEDID
 
         let seedName  = ''
@@ -143,7 +144,7 @@ Promise.all([getOwnedPlots(ACCOUNT),getRentedPlots(ACCOUNT),getSeeds(ACCOUNT)]).
             seedYield = seedsByID[plantedSeedID].properties.PR
         }
 
-        table_markup += `<tr><td>${plot._id}</td><td>${plot.properties.NAME}</td><td>${plot.properties.OCCUPIED}</td><td>${plot.properties.RENTED}</td><td>${plantedSeedID}</td><td>${seedName}</td><td>${seedWater}</td><td>${seedYield}</td></tr>`
+        table_markup += `<tr><td>${plot._id}</td><td>${plot.properties.NAME}</td><td>${plot.properties.RENTED}</td><td>${plantedSeedID}</td><td>${seedName}</td><td>${seedWater}</td><td>${seedYield}</td></tr>`
     }
 
 
