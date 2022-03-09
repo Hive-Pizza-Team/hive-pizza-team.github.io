@@ -123,7 +123,7 @@ Promise.all([getOwnedPlots(ACCOUNT),getRentedPlots(ACCOUNT),getSeeds(ACCOUNT)]).
 
     let allPlots = ownedPlots.concat(rentedPlots)
 
-    let table_markup = '<thead><th>id</th><th>Region</th><th>Rented</th><th>Seed ID</th><th>Planted Seed</th><th>Water</th><th>Yield</th>'
+    let table_markup = '<thead><th>id</th><th>Region</th><th>Rented</th><th>Seed ID</th><th>Planted Seed</th><th>Water</th><th>Yield</th><th>Time Left</th>'
 
     var seedsByID = {}
     for (seed of seeds) {
@@ -138,14 +138,16 @@ Promise.all([getOwnedPlots(ACCOUNT),getRentedPlots(ACCOUNT),getSeeds(ACCOUNT)]).
         let seedName  = ''
         let seedWater = ''
         let seedYield = ''
+        let seedTime  = ''
 
         if (plot.properties.SEEDID != 0) {
             seedName  = seedsByID[plantedSeedID].properties.NAME
             seedWater = seedsByID[plantedSeedID].properties.WATER
             seedYield = seedsByID[plantedSeedID].properties.PR
+            seedTime  = seedsByID[plantedSeedID].properties.SPT
         }
 
-        table_markup += `<tr><td>${plot._id}</td><td>${plot.properties.NAME}</td><td>${plot.properties.RENTED}</td><td>${plantedSeedID}</td><td>${seedName}</td><td>${seedWater}</td><td>${seedYield}</td></tr>`
+        table_markup += `<tr><td>${plot._id}</td><td>${plot.properties.NAME}</td><td>${plot.properties.RENTED}</td><td>${plantedSeedID}</td><td>${seedName}</td><td>${seedWater}</td><td>${seedYield}</td><td>${seedTime}</td></tr>`
     }
 
 
