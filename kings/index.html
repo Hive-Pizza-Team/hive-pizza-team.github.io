@@ -21,7 +21,7 @@
     <h2>HashKings Plots</h2><br>
     <!--<button class="btn btn-secondary">PLANT ALL</button>-->
     <!--<button class="btn btn-primary">WATER ALL</button>-->
-    <!--<button class="btn btn-success">HARVEST ALL</button>-->
+    
     <table id="plots_table" class="table table-striped">
 
     </table>
@@ -165,17 +165,37 @@ function harvestSingle(wallet, seedID) {
 }
 
 
+function harvestMultiple(wallet, seedIDs) {
+
+    if (seedIDs.length == 0) {
+        window.alert('Nothing to harvest!')
+    }
+
+    for (seedID of seedIDs) {
+        continue_message = `Are you sure you want to harvest seed ${seedID}?`
+        should_continue = window.confirm(continue_message)
+        harvestSingle(wallet, seedIDs)
+    }
+}
+
+
 Promise.all([getOwnedPlots(ACCOUNT),getRentedPlots(ACCOUNT),getSeeds(ACCOUNT)]).then( (values) => {
     let [ownedPlots, rentedPlots, seeds] = values
 
     let allPlots = ownedPlots.concat(rentedPlots)
 
-    let table_markup = '<thead><th>id</th><th>Region</th><th>Rented</th><th>Seed ID</th><th>Planted Seed</th><th>Water</th><th>Yield</th><th>Time Left</th><th colspan="3">Actions</th>'
+    let table_markup = '<thead><th>id</th><th>Region</th><th>Rented</th><th>Seed ID</th><th>Planted Seed</th><th>Water</th><th>Yield</th><th>Time Left</th><th colspan="3"><button title="Harvest All" class="btn btn-success" id="harvest-all"><i class="fa-solid fa-scissors"></i> ALL</button><br>Actions</th>'
 
     var seedsByID = {}
+    var seedsReady = []
     for (seed of seeds) {
         seedsByID[seed._id] = seed
         //console.log(seed)
+
+        let seedTime  = seed.properties.SPT
+        if (seedTime === 0) {
+            seedsReady.push(seed._id)
+        }
     }
 
     for (plot of allPlots) {
@@ -187,9 +207,9 @@ Promise.all([getOwnedPlots(ACCOUNT),getRentedPlots(ACCOUNT),getSeeds(ACCOUNT)]).
         let seedYield = ''
         let seedTime  = ''
 
-        let plantBtn   = ''//'<button class="btn btn-secondary" disabled="disabled"><i class="fa-solid fa-seedling"></i></button>'
-        let waterBtn   = ''//`<button class="btn btn-primary" disabled="disabled"><i class="fa-solid fa-hand-holding-droplet"></i></button>`
-        let harvestBtn = '<button class="btn btn-success" disabled="disabled"><i class="fa-solid fa-scissors"></i></button>'
+        let plantBtn   = ''//'<button title="Plant" class="btn btn-secondary" disabled="disabled"><i class="fa-solid fa-seedling"></i></button>'
+        let waterBtn   = ''//`<button title="Water" class="btn btn-primary" disabled="disabled"><i class="fa-solid fa-hand-holding-droplet"></i></button>`
+        let harvestBtn = '<button title="Harvest" class="btn btn-success" disabled="disabled"><i class="fa-solid fa-scissors"></i></button>'
 
 
         if (plot.properties.SEEDID != 0 && seedsByID[plot.properties.SEEDID] !== undefined) {
@@ -199,14 +219,14 @@ Promise.all([getOwnedPlots(ACCOUNT),getRentedPlots(ACCOUNT),getSeeds(ACCOUNT)]).
             seedTime  = seedsByID[plantedSeedID].properties.SPT
 
             if (seedWater !== 0) {
-                waterBtn = `<button class="btn btn-primary"><i class="fa-solid fa-hand-holding-droplet"></i></button>`
+                waterBtn = `<button title="Water" class="btn btn-primary"><i class="fa-solid fa-hand-holding-droplet"></i></button>`
             }
 
             if (seedTime === 0) {
-                harvestBtn = `<button class="btn btn-success" onClick="harvestSingle('${ACCOUNT}',${plantedSeedID})"><i class="fa-solid fa-scissors"></i></button>`
+                harvestBtn = `<button title="Harvest" class="btn btn-success" onClick="harvestSingle('${ACCOUNT}',${plantedSeedID})"><i class="fa-solid fa-scissors"></i></button>`
             }
         } else {
-            plantBtn = ''//<button class="btn btn-primary"><i class="fa-solid fa-hand-holding-seedling"></i></button>'
+            plantBtn = ''//<button title="Plant" class="btn btn-primary"><i class="fa-solid fa-hand-holding-seedling"></i></button>'
         }
 
         if (plantedSeedID == 0) {
@@ -218,6 +238,10 @@ Promise.all([getOwnedPlots(ACCOUNT),getRentedPlots(ACCOUNT),getSeeds(ACCOUNT)]).
 
 
     document.querySelector('table#plots_table').innerHTML = table_markup
+
+    document.querySelector('button#harvest-all').onclick = function () {
+        harvestMultiple(ACCOUNT,seedsReady)
+    }
 })
 
 
