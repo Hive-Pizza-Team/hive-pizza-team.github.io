@@ -135,7 +135,7 @@ Promise.all([getOwnedPlots(ACCOUNT),getRentedPlots(ACCOUNT),getSeeds(ACCOUNT)]).
     }
 
     for (plot of allPlots) {
-        console.log(plot)
+        //console.log(plot)
         let plantedSeedID = plot.properties.SEEDID
 
         let seedName  = ''
@@ -143,11 +143,15 @@ Promise.all([getOwnedPlots(ACCOUNT),getRentedPlots(ACCOUNT),getSeeds(ACCOUNT)]).
         let seedYield = ''
         let seedTime  = ''
 
-        if (plot.properties.SEEDID != 0) {
+        if (plot.properties.SEEDID != 0 && seedsByID[plot.properties.SEEDID] !== undefined) {
             seedName  = seedsByID[plantedSeedID].properties.NAME
             seedWater = seedsByID[plantedSeedID].properties.WATER
             seedYield = seedsByID[plantedSeedID].properties.PR
             seedTime  = seedsByID[plantedSeedID].properties.SPT
+        }
+
+        if (plantedSeedID == 0) {
+            plantedSeedID = 'Empty'
         }
 
         table_markup += `<tr><td>${plot._id}</td><td>${plot.properties.NAME}</td><td>${plot.properties.RENTED}</td><td>${plantedSeedID}</td><td>${seedName}</td><td>${seedWater}</td><td>${seedYield}</td><td>${seedTime}</td></tr>`
