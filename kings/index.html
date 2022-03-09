@@ -36,12 +36,15 @@
 
 <script>
 
-//var wallet = window.prompt('Note: requires Hive Keychain. \nEnter Hive account name:')
+//var wallet = 
 
 var urlParams = new URLSearchParams(window.location.search)
 const DEFAULT_ACCOUNT = 'null'
 var ACCOUNT = urlParams.has('account') ? urlParams.get('account').toLowerCase() : DEFAULT_ACCOUNT
 
+if (ACCOUNT === DEFAULT_ACCOUNT) {
+    ACCOUNT = window.prompt('Enter Hive account name:')
+}
 
 const rpc = 'https://api2.hive-engine.com/rpc/contracts';
 function getOwnedPlots(account) {
