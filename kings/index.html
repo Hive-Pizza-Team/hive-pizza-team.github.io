@@ -188,7 +188,7 @@ Promise.all([getOwnedPlots(ACCOUNT),getRentedPlots(ACCOUNT),getSeeds(ACCOUNT)]).
 
     let allPlots = ownedPlots.concat(rentedPlots)
 
-    let table_markup = '<thead><th>id</th><th>Region</th><th>Rented</th><th>Seed ID</th><th>Planted Seed</th><th>Water</th><th>Yield</th><th>Time Left</th><th colspan="3"><button title="Harvest All" class="btn btn-success" id="harvest-all"><i class="fa-solid fa-scissors"></i> ALL</button><br>Actions</th>'
+    let table_markup = '<thead><th>id</th><th>Region</th><th>Rented</th><th>Seed ID</th><th>Planted Seed</th><th>Water</th><th>Yield</th><th>Time Left</th><th colspan="3"><button title="Harvest All" class="btn btn-success" id="harvest-all" disable="disabled"><i class="fa-solid fa-scissors"></i> ALL</button><br>Actions</th>'
 
     var seedsByID = {}
     var seedsReady = []
