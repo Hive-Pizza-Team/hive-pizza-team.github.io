@@ -374,9 +374,9 @@ Promise.all([getOwnedPlots(ACCOUNT),getRentedPlots(ACCOUNT),getSeeds(ACCOUNT)]).
                 seedList = ''
                 for (seedName of getSeedListForRegion(regionName)) {
                     for (seedID in seedsByID) {
-                        if (seedsByID[seedID].properties.NAME === seedName && !plantedSeedIDs.includes(seedID) && seedsByID[seedID].properties.WATER !== 0) {
-                            seedList += `<a class="dropdown-item" href="#">${seedName} - ${seedID}</a>`
-                            console.log(seedsByID[seedID])
+                        let seed = seedsByID[seedID]
+                        if (seed.properties.NAME === seedName && !plantedSeedIDs.includes(seedID) && seed.properties.WATER !== 0) {
+                            seedList += `<a class="dropdown-item" href="#">${seedName} - ID:${seedID} - W:${seed.properties.WATER} HKWATER - Y:${seed.properties.PR} BUDS - T:${seed.properties.SPT} Days</a>`
                         }
                     }
                 }
