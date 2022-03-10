@@ -19,7 +19,12 @@
 
     <div class="col-lg-8 mx-auto p-3 py-md-5">
     <h2><img width="8%" src="https://files.peakd.com/file/peakd-hive/dibblers.dabs/23uQNzfZigGqCxZsZS33wLNhi5zprshnmUbRTqFxk5G8whe9peSXPPEC7vEuQ19vXxa9f.png"> Pizza Kings - HashKings Plots</h2>
-    <h6>Warning: this is untested software. Bugs are rampant.</h6>
+    <h6>Alpha Testing Notes:</h6>
+    <ul>
+        <li>Warning: this is untested software. Bugs are rampant.</li>
+        <li>Hive Keychain is required. You can use this app within the Hive Keychain mobile app's built-in browser.</li>
+        <li>The UI will refresh automatically. After you sign a transaction with Keychain, it can take around 1 minute for the back-end to update.</li>
+    </ul>
 
     <table id="plots_table" class="table table-striped">
 
@@ -38,14 +43,18 @@
   </div>
       Join us in <a href="https://discord.gg/hivepizza">HivePizza discord</a>
 
+
   </footer>
     </div>
 
+    <div id="has-any-plot-changed" data-plots=""></div>
+    <div id="has-any-seed-changed" data-seeds=""></div>
+    <div id="has-any-avatar-changed" data-avatars=""></div>
 
 
 <script>
 
-//var wallet = 
+const REFRESH_INTERVAL = 2000 // 2000 ms = 2 s
 
 var urlParams = new URLSearchParams(window.location.search)
 const DEFAULT_ACCOUNT = 'null'
@@ -295,154 +304,172 @@ function getSeedListForRegion(regionName) {
 }
 
 
-Promise.all([getOwnedPlots(ACCOUNT),getRentedPlots(ACCOUNT),getSeeds(ACCOUNT)]).then( (values) => {
-    let [ownedPlots, rentedPlots, seeds] = values
+function plotsAndSeedsUpdate() {
+    Promise.all([getOwnedPlots(ACCOUNT),getRentedPlots(ACCOUNT),getSeeds(ACCOUNT)]).then( (values) => {
+        let [ownedPlots, rentedPlots, seeds] = values
 
-    let allPlots = ownedPlots.concat(rentedPlots)
+        let allPlots = ownedPlots.concat(rentedPlots)
 
-    let waterAllBtn = '<button title="Water All" class="btn btn-primary" id="water-all" disabled="disabled"><i class="fa-solid fa-hand-holding-droplet"></i> ALL</button>'
-    let harvestAllBtn = '<button title="Harvest All" class="btn btn-success" id="harvest-all" disabled="disabled"><i class="fa-solid fa-scissors"></i> ALL</button>'
+        let hasPlotDataChanged = JSON.stringify(allPlots) !== document.querySelector('div#has-any-plot-changed').getAttribute('data-plots')
+        let hasSeedDataChanged = JSON.stringify(seeds) !== document.querySelector('div#has-any-seed-changed').getAttribute('data-seeds')
 
-    let table_markup = `<thead><th>id</th><th>Region</th><th>Rented To</th><th>Seed ID</th><th>Planted Seed</th><th>Water<br>Needed</th><th>Yield</th><th>Time Left</th><th colspan="3">${waterAllBtn}<br>${harvestAllBtn}<br>Actions</th>`
-    document.querySelector('table#plots_table').innerHTML = table_markup
-    table_markup = ''
-    var seedsByID = {}
-    var seedsByName = {}
-    var seedsReady = []
-    var seedsNeedWater = []
-    var plantedSeedIDs = []
-
-    var totalWaterNeeded = 0
-
-    // build dictionaries of available seeds by name and by ID
-    // also build a list of seeds that are ready to harvest, for the "harvest all" button
-    for (seed of seeds) {
-        seedsByID[seed._id] = seed
-        //console.log(seed)
-
-        seedsByName[seed.properties.NAME] = seed
-
-        let seedTime  = seed.properties.SPT
-        if (seedTime === 0) {
-            seedsReady.push(seed._id)
+        if (!hasSeedDataChanged && !hasPlotDataChanged) {
+            return
         }
-    }
 
-    // build a list of the seeds that have already been planted, so we don't try to plant one again
-    for (plot of allPlots) {
-        let plantedSeedID = plot.properties.SEEDID
-        plantedSeedIDs.push(plantedSeedID)
-    }
+        if (hasPlotDataChanged)  {
+            console.log('Plot data changed. Updating UI.')
+            document.querySelector('div#has-any-plot-changed').setAttribute('data-plots', JSON.stringify(allPlots))
+        }
 
-    
+        if (hasSeedDataChanged) {
+            console.log('Seed data changed. Updating UI.')
+            document.querySelector('div#has-any-seed-changed').setAttribute('data-seeds', JSON.stringify(seeds))
+        }
 
-    for (plot of allPlots) {
-        //console.log(plot)
-        let plantedSeedID = plot.properties.SEEDID
+        let waterAllBtn = '<button title="Water All" class="btn btn-primary" id="water-all" disabled="disabled"><i class="fa-solid fa-hand-holding-droplet"></i> ALL</button>'
+        let harvestAllBtn = '<button title="Harvest All" class="btn btn-success" id="harvest-all" disabled="disabled"><i class="fa-solid fa-scissors"></i> ALL</button>'
 
-        let regionName = plot.properties.NAME
+        let table_markup = `<thead><th>id</th><th>Region</th><th>Rented To</th><th>Seed ID</th><th>Planted Seed</th><th>Water<br>Needed</th><th>Yield</th><th>Time Left</th><th colspan="3">${waterAllBtn}<br>${harvestAllBtn}<br>Actions</th>`
+        document.querySelector('table#plots_table').innerHTML = table_markup
+        table_markup = ''
+        var seedsByID = {}
+        var seedsByName = {}
+        var seedsReady = []
+        var seedsNeedWater = []
+        var plantedSeedIDs = []
 
-        let seedName  = ''
-        let seedWater = ''
-        let seedYield = ''
-        let seedTime  = ''
+        var totalWaterNeeded = 0
 
-        let plantBtn   = ''//'<button title="Plant" class="btn btn-secondary" disabled="disabled"><i class="fa-solid fa-seedling"></i></button>'
-        let waterBtn   = ''//`<button title="Water" class="btn btn-primary" disabled="disabled"><i class="fa-solid fa-hand-holding-droplet"></i></button>`
-        let harvestBtn = ''//'<button title="Harvest" class="btn btn-success" disabled="disabled"><i class="fa-solid fa-scissors"></i></button>'
+        // build dictionaries of available seeds by name and by ID
+        // also build a list of seeds that are ready to harvest, for the "harvest all" button
+        for (seed of seeds) {
+            seedsByID[seed._id] = seed
+            //console.log(seed)
 
-        let isRented = plot.properties.RENTED & plot.properties.RENTED === true
-        let rentedTo = plot.properties.RENTEDINFO
+            seedsByName[seed.properties.NAME] = seed
 
-        // if the plot is occupied
-        if (plot.properties.SEEDID != 0 && seedsByID[plot.properties.SEEDID] !== undefined) {
-            seedName  = seedsByID[plantedSeedID].properties.NAME
-            seedWater = seedsByID[plantedSeedID].properties.WATER
-            seedYield = seedsByID[plantedSeedID].properties.PR
-            seedTime  = seedsByID[plantedSeedID].properties.SPT
-
-            if (seedWater !== 0) {
-                totalWaterNeeded += seedWater
-                seedsNeedWater.push(plantedSeedID)
-                waterBtn = `<button title="Water" class="btn btn-primary" onClick="waterMultiple('${ACCOUNT}',[${plantedSeedID}],${totalWaterNeeded})"><i class="fa-solid fa-hand-holding-droplet"></i></button>`
-                document.querySelector('button#water-all').removeAttribute('disabled')
-            }
-
-            // if it's ready to harvest, show a harvest button
+            let seedTime  = seed.properties.SPT
             if (seedTime === 0) {
-                harvestBtn = `<button title="Harvest" class="btn btn-success" onClick="harvestSingle('${ACCOUNT}',${plantedSeedID})"><i class="fa-solid fa-scissors"></i></button>`
+                seedsReady.push(seed._id)
             }
-        } else {
-            // if the plot is unoccupied and plantable, show the list of possible seeds
-            if (!isRented || (isRented && rentedTo === ACCOUNT)) {
-                plantBtn = `<button id="b${plot._id}" title="Plant" class="btn btn-secondary plant" disabled="disabled" data-plot-id="${plot._id}"><i class="fa-solid fa-seedling"></i></button>`
+        }
 
-                seedList = ''
-                for (seedName of getSeedListForRegion(regionName)) {
-                    for (seedID in seedsByID) {
-                        let seed = seedsByID[seedID]
-                        
-                        if (seed.properties.NAME === seedName && !plantedSeedIDs.includes(seed._id) && seed.properties.WATER !== 0) {
-                            seedList += `<a class="dropdown-item" data-plot-id="${plot._id}" data-seed-id="${seedID}">${seedName} - ID:${seedID} - W:${seed.properties.WATER} HKWATER - Y:${seed.properties.PR} BUDS - T:${seed.properties.SPT} Days</a>`
-                        }
-                    }
+        // build a list of the seeds that have already been planted, so we don't try to plant one again
+        for (plot of allPlots) {
+            let plantedSeedID = plot.properties.SEEDID
+            plantedSeedIDs.push(plantedSeedID)
+        }
+
+        
+
+        for (plot of allPlots) {
+            //console.log(plot)
+            let plantedSeedID = plot.properties.SEEDID
+
+            let regionName = plot.properties.NAME
+
+            let seedName  = ''
+            let seedWater = ''
+            let seedYield = ''
+            let seedTime  = ''
+
+            let plantBtn   = ''//'<button title="Plant" class="btn btn-secondary" disabled="disabled"><i class="fa-solid fa-seedling"></i></button>'
+            let waterBtn   = ''//`<button title="Water" class="btn btn-primary" disabled="disabled"><i class="fa-solid fa-hand-holding-droplet"></i></button>`
+            let harvestBtn = ''//'<button title="Harvest" class="btn btn-success" disabled="disabled"><i class="fa-solid fa-scissors"></i></button>'
+
+            let isRented = plot.properties.RENTED & plot.properties.RENTED === true
+            let rentedTo = plot.properties.RENTEDINFO
+
+            // if the plot is occupied
+            if (plot.properties.SEEDID != 0 && seedsByID[plot.properties.SEEDID] !== undefined) {
+                seedName  = seedsByID[plantedSeedID].properties.NAME
+                seedWater = seedsByID[plantedSeedID].properties.WATER
+                seedYield = seedsByID[plantedSeedID].properties.PR
+                seedTime  = seedsByID[plantedSeedID].properties.SPT
+
+                if (seedWater !== 0) {
+                    totalWaterNeeded += seedWater
+                    seedsNeedWater.push(plantedSeedID)
+                    waterBtn = `<button title="Water" class="btn btn-primary" onClick="waterMultiple('${ACCOUNT}',[${plantedSeedID}],${totalWaterNeeded})"><i class="fa-solid fa-hand-holding-droplet"></i></button>`
+                    document.querySelector('button#water-all').removeAttribute('disabled')
                 }
 
-                seedName = `<div class="seeddropdown dropdown">
-              <button class="btn btn-secondary dropdown-toggle btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Select Seed
-              </button>
-              <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                ${seedList}
-              </div>
-            </div>`
+                // if it's ready to harvest, show a harvest button
+                if (seedTime === 0) {
+                    harvestBtn = `<button title="Harvest" class="btn btn-success" onClick="harvestSingle('${ACCOUNT}',${plantedSeedID})"><i class="fa-solid fa-scissors"></i></button>`
+                }
+            } else {
+                // if the plot is unoccupied and plantable, show the list of possible seeds
+                if (!isRented || (isRented && rentedTo === ACCOUNT)) {
+                    plantBtn = `<button id="b${plot._id}" title="Plant" class="btn btn-secondary plant" disabled="disabled" data-plot-id="${plot._id}"><i class="fa-solid fa-seedling"></i></button>`
+
+                    seedList = ''
+                    for (seedName of getSeedListForRegion(regionName)) {
+                        for (seedID in seedsByID) {
+                            let seed = seedsByID[seedID]
+                            
+                            if (seed.properties.NAME === seedName && !plantedSeedIDs.includes(seed._id) && seed.properties.WATER !== 0) {
+                                seedList += `<a class="dropdown-item" data-plot-id="${plot._id}" data-seed-id="${seedID}">${seedName} - ID:${seedID} - W:${seed.properties.WATER} HKWATER - Y:${seed.properties.PR} BUDS - T:${seed.properties.SPT} Days</a>`
+                            }
+                        }
+                    }
+
+                    seedName = `<div class="seeddropdown dropdown">
+                  <button class="btn btn-secondary dropdown-toggle btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Select Seed
+                  </button>
+                  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    ${seedList}
+                  </div>
+                </div>`
+                }
+                
             }
-            
+
+            // Show "empty" if the plot is unoccupied
+            if (plantedSeedID == 0) {
+                plantedSeedID = 'Empty'
+            }
+
+            table_markup += `<tr><td>${plot._id}</td><td>${plot.properties.NAME}</td><td>${rentedTo ? rentedTo: 'n/a'}</td><td>${plantedSeedID}</td><td>${seedName}</td><td>${seedWater}</td><td>${seedYield}</td><td>${seedTime}</td><td>${plantBtn}</td><td>${waterBtn}</td><td>${harvestBtn}</td></tr>`
         }
 
-        // Show "empty" if the plot is unoccupied
-        if (plantedSeedID == 0) {
-            plantedSeedID = 'Empty'
+        // paint the main table
+        document.querySelector('table#plots_table').innerHTML += table_markup
+
+        // add click handler for harvest-all button
+        //document.querySelector('button#harvest-all').onclick = function () {
+        //    harvestMultiple(ACCOUNT,seedsReady)
+        //}
+
+        // add click handler for water-all button
+        document.querySelector('button#water-all').onclick = function () {
+            waterMultiple(ACCOUNT,seedsNeedWater,totalWaterNeeded)
         }
 
-        table_markup += `<tr><td>${plot._id}</td><td>${plot.properties.NAME}</td><td>${rentedTo ? rentedTo: 'n/a'}</td><td>${plantedSeedID}</td><td>${seedName}</td><td>${seedWater}</td><td>${seedYield}</td><td>${seedTime}</td><td>${plantBtn}</td><td>${waterBtn}</td><td>${harvestBtn}</td></tr>`
-    }
+        // add click handler for seed dropowns
+        for (let option of document.querySelectorAll('a.dropdown-item')) {
+            option.onclick = (e) => {
+                let plotID = e.target.getAttribute('data-plot-id')
+                let seedID = e.target.getAttribute('data-seed-id')
+                e.target.parentNode.parentNode.children[0].innerHTML = seedID
 
-    // paint the main table
-    document.querySelector('table#plots_table').innerHTML += table_markup
-
-    // add click handler for harvest-all button
-    //document.querySelector('button#harvest-all').onclick = function () {
-    //    harvestMultiple(ACCOUNT,seedsReady)
-    //}
-
-    // add click handler for water-all button
-    document.querySelector('button#water-all').onclick = function () {
-        waterMultiple(ACCOUNT,seedsNeedWater,totalWaterNeeded)
-    }
-
-    // add click handler for seed dropowns
-    for (let option of document.querySelectorAll('a.dropdown-item')) {
-        option.onclick = (e) => {
-            let plotID = e.target.getAttribute('data-plot-id')
-            let seedID = e.target.getAttribute('data-seed-id')
-            e.target.parentNode.parentNode.children[0].innerHTML = seedID
-
-            let plantBtn = document.querySelector(`button#b${plotID}`)
-            plantBtn.setAttribute('data-seed-id', seedID)
-            plantBtn.removeAttribute("disabled");
+                let plantBtn = document.querySelector(`button#b${plotID}`)
+                plantBtn.setAttribute('data-seed-id', seedID)
+                plantBtn.removeAttribute("disabled");
+            }
         }
-    }
-    // add click handler for plant buttons
-    for (let button of document.querySelectorAll('button.plant')) {
-        button.onclick = (e) => {
-            let plotID = e.target.getAttribute('data-plot-id')
-            let seedID = e.target.getAttribute('data-seed-id')
+        // add click handler for plant buttons
+        for (let button of document.querySelectorAll('button.plant')) {
+            button.onclick = (e) => {
+                let plotID = e.target.getAttribute('data-plot-id')
+                let seedID = e.target.getAttribute('data-seed-id')
 
-            plantOne(ACCOUNT, plotID, seedID)
+                plantOne(ACCOUNT, plotID, seedID)
+            }
         }
-    }
-})
-
+    })
+}
 
 function getAvatars(wallet) {
     let api = `https://hashkings.xyz/userdata/${wallet}`
@@ -458,21 +485,38 @@ function getAvatars(wallet) {
 }
 
 
-Promise.all([getAvatars(ACCOUNT)]).then( (values) => {
-    let [avatars] = values
+function avatarsUpdate() {
+    Promise.all([getAvatars(ACCOUNT)]).then( (values) => {
+        let [avatars] = values
 
-    console.log(avatars)
+        let hasAvatarDataChanged = JSON.stringify(avatars) !== document.querySelector('div#has-any-avatar-changed').getAttribute('data-avatars')
 
-    let table_markup = `<thead><th>ID</th><th>Owner</th><th>Name</th><th>Power</th><th>Usage</th><th>XP</th>`
 
-    for (avatar of avatars) {
-        table_markup += `<tr><td>${avatar.id}</td><td>${avatar.owner}</td><td>${avatar.properties.NAME}</td><td>${avatar.properties.POWER}</td><td>${avatar.properties.USAGE}</td><td>${avatar.properties.XP}</td></tr>`
-    }
+        if (hasAvatarDataChanged) {
+            console.log('Avatar data changed. Updating UI.')
+            document.querySelector('div#has-any-avatar-changed').setAttribute('data-avatars', JSON.stringify(avatars))
+        } else {
+            return
+        }
 
-    // paint the avatars table
-    document.querySelector('table#avatars_table').innerHTML += table_markup
+        let table_markup = `<thead><th>ID</th><th>Owner</th><th>Name</th><th>Power</th><th>Usage</th><th>XP</th>`
 
-})
+        for (avatar of avatars) {
+            table_markup += `<tr><td>${avatar.id}</td><td>${avatar.owner}</td><td>${avatar.properties.NAME}</td><td>${avatar.properties.POWER}</td><td>${avatar.properties.USAGE}</td><td>${avatar.properties.XP}</td></tr>`
+        }
+
+        // paint the avatars table
+        document.querySelector('table#avatars_table').innerHTML += table_markup
+    })
+}
+
+
+// Fetch data on load and then refresh every N ms.
+avatarsUpdate()
+window.setInterval(avatarsUpdate, REFRESH_INTERVAL)
+
+plotsAndSeedsUpdate()
+window.setInterval(plotsAndSeedsUpdate, REFRESH_INTERVAL)
 
 
 </script>
