@@ -173,51 +173,8 @@ function harvestMultiple(wallet, seedIDs) {
         return
     }
 
-    continue_message = `Are you sure you want to harvest seeds?: ${seedIDs}?`
-    should_continue = window.confirm(continue_message)
-
-    if (!should_continue) {
-        return
-    }
-
-    custom_json_id = 'ssc-mainnet-hive'
-
-    seedIDsString = seedIDs.map((seedID) => String(seedID))
-
-    let json_payload = {
-        'contractName': 'nft',
-        'contractAction': 'transfer',
-        'contractPayload':{
-            'to':'hk-vault',
-            'nfts':[
-                {'symbol':'HKFARM',
-                 'ids': seedIDsString
-                }
-            ]
-        }
-    }
-
-    json_payload = JSON.stringify(json_payload)
-
-    console.log(json_payload)
-
-    let resultPromise = hive_keychain.requestCustomJson(
-        wallet,
-        custom_json_id,
-        'Active',
-        json_payload,
-        `Harvesting HK Plot for Seeds: ${seedIDs}`,
-        function(response) {
-            console.log(response);
-            if (!response['success']) {
-                console.log(`Failure! Keychain failed to authorize the transaction for @${wallet}`)
-            } else {
-                console.log(`Success! Plots harvested for @${wallet}`)
-            }
-        }
-    )
-
-    Promise.resolve(resultPromise)
+    window.alert('Not implemented!')
+    return
 }
 
 
@@ -274,6 +231,43 @@ function waterMultiple(wallet, seedIDs, totalWaterNeeded) {
 }
 
 
+function plantOne(wallet, plotID, seedID) {
+    custom_json_id = 'qwoyn_plant_plot'
+
+    if (!plotID || !seedID) {
+        window.alert('Error! Report in Discord')
+        return
+    }
+
+    let json_payload = {'plotID': plotID, 'seedID': seedID}
+
+    json_payload = JSON.stringify(json_payload)
+    console.log(json_payload)
+
+    continue_message = `Are you sure you want to plant seed ${seedID}, on plot ${plotID}?`
+    should_continue = window.confirm(continue_message)
+
+    let resultPromise = hive_keychain.requestCustomJson(
+        wallet,
+        custom_json_id,
+        'Active',
+        json_payload,
+        `Planting HK Plots`,
+        function(response) {
+            console.log(response);
+            if (!response['success']) {
+                console.log(`Failure! Keychain failed to authorize the transaction for @${wallet}`)
+            } else {
+                console.log(`Success! Plot planted for @${wallet}`)
+            }
+        }
+    )
+
+    Promise.resolve(resultPromise)
+}
+
+
+
 function getSeedListForRegion(regionName) {
     if (regionName === 'Asia') {
         return ['Aceh','Thai','Chocolate Thai']
@@ -301,7 +295,7 @@ Promise.all([getOwnedPlots(ACCOUNT),getRentedPlots(ACCOUNT),getSeeds(ACCOUNT)]).
     let waterAllBtn = '<button title="Water All" class="btn btn-primary" id="water-all"><i class="fa-solid fa-hand-holding-droplet"></i> ALL</button>'
     let harvestAllBtn = '<button title="Harvest All" class="btn btn-success" id="harvest-all" disabled="disabled"><i class="fa-solid fa-scissors"></i> ALL</button>'
 
-    let table_markup = `<thead><th>id</th><th>Region</th><th>Rented To</th><th>Seed ID</th><th>Planted Seed</th><th>Water</th><th>Yield</th><th>Time Left</th><th colspan="3">${waterAllBtn}<br>${harvestAllBtn}<br>Actions</th>`
+    let table_markup = `<thead><th>id</th><th>Region</th><th>Rented To</th><th>Seed ID</th><th>Planted Seed</th><th>Water<br>Needed</th><th>Yield</th><th>Time Left</th><th colspan="3">${waterAllBtn}<br>${harvestAllBtn}<br>Actions</th>`
 
     var seedsByID = {}
     var seedsByName = {}
@@ -330,6 +324,8 @@ Promise.all([getOwnedPlots(ACCOUNT),getRentedPlots(ACCOUNT),getSeeds(ACCOUNT)]).
         let plantedSeedID = plot.properties.SEEDID
         plantedSeedIDs.push(plantedSeedID)
     }
+
+    
 
     for (plot of allPlots) {
         //console.log(plot)
@@ -369,19 +365,20 @@ Promise.all([getOwnedPlots(ACCOUNT),getRentedPlots(ACCOUNT),getSeeds(ACCOUNT)]).
         } else {
             // if the plot is unoccupied and plantable, show the list of possible seeds
             if (!isRented || (isRented && rentedTo === ACCOUNT)) {
-                plantBtn = '<button title="Plant" class="btn btn-secondary" disabled="disabled"><i class="fa-solid fa-seedling"></i></button>'
+                plantBtn = `<button id="b${plot._id}" title="Plant" class="btn btn-secondary plant" disabled="disabled" data-plot-id="${plot._id}"><i class="fa-solid fa-seedling"></i></button>`
 
                 seedList = ''
                 for (seedName of getSeedListForRegion(regionName)) {
                     for (seedID in seedsByID) {
                         let seed = seedsByID[seedID]
-                        if (seed.properties.NAME === seedName && !plantedSeedIDs.includes(seedID) && seed.properties.WATER !== 0) {
-                            seedList += `<a class="dropdown-item" href="#">${seedName} - ID:${seedID} - W:${seed.properties.WATER} HKWATER - Y:${seed.properties.PR} BUDS - T:${seed.properties.SPT} Days</a>`
+                        
+                        if (seed.properties.NAME === seedName && !plantedSeedIDs.includes(seed._id) && seed.properties.WATER !== 0) {
+                            seedList += `<a class="dropdown-item" data-plot-id="${plot._id}" data-seed-id="${seedID}">${seedName} - ID:${seedID} - W:${seed.properties.WATER} HKWATER - Y:${seed.properties.PR} BUDS - T:${seed.properties.SPT} Days</a>`
                         }
                     }
                 }
 
-                seedName = `<div class="dropdown">
+                seedName = `<div class="seeddropdown dropdown">
               <button class="btn btn-secondary dropdown-toggle btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 Select Seed
               </button>
@@ -405,13 +402,34 @@ Promise.all([getOwnedPlots(ACCOUNT),getRentedPlots(ACCOUNT),getSeeds(ACCOUNT)]).
     document.querySelector('table#plots_table').innerHTML = table_markup
 
     // add click handler for harvest-all button
-    document.querySelector('button#harvest-all').onclick = function () {
-        harvestMultiple(ACCOUNT,seedsReady)
-    }
+    //document.querySelector('button#harvest-all').onclick = function () {
+    //    harvestMultiple(ACCOUNT,seedsReady)
+    //}
 
     // add click handler for water-all button
     document.querySelector('button#water-all').onclick = function () {
         waterMultiple(ACCOUNT,seedsNeedWater,totalWaterNeeded)
+    }
+
+    // add click handler for seed dropowns
+    for (let option of document.querySelectorAll('a.dropdown-item')) {
+        option.onclick = (e) => {
+            let plotID = e.target.getAttribute('data-plot-id')
+            let seedID = e.target.getAttribute('data-seed-id')
+
+            let plantBtn = document.querySelector(`button#b${plotID}`)
+            plantBtn.setAttribute('data-seed-id', seedID)
+            plantBtn.removeAttribute("disabled");
+        }
+    }
+    // add click handler for plant buttons
+    for (let button of document.querySelectorAll('button.plant')) {
+        button.onclick = (e) => {
+            let plotID = e.target.getAttribute('data-plot-id')
+            let seedID = e.target.getAttribute('data-seed-id')
+
+            plantOne(ACCOUNT, plotID, seedID)
+        }
     }
 })
 
