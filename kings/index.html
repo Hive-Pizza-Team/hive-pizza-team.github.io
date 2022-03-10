@@ -194,8 +194,6 @@ function waterMultiple(wallet, seedIDs, totalWaterNeeded) {
 
     custom_json_id = 'ssc-mainnet-hive'
 
-
-//{"contractName":"tokens","contractAction":"transfer","contractPayload":{"symbol":"HKWATER","to":"hk-vault","quantity":"2800.000","memo":639692}}
     let json_payload = {
         'contractName': 'tokens',
         'contractAction': 'transfer',
@@ -244,8 +242,13 @@ function plantOne(wallet, plotID, seedID) {
     json_payload = JSON.stringify(json_payload)
     console.log(json_payload)
 
-    continue_message = `Are you sure you want to plant seed ${seedID}, on plot ${plotID}?`
+    continue_message = `Are you sure you want to plant seed ${seedID}, on plot ${plotID}?\n
+                        Warning: only plant each seed once!`
     should_continue = window.confirm(continue_message)
+
+    if (!should_continue) {
+        return
+    }
 
     let resultPromise = hive_keychain.requestCustomJson(
         wallet,
@@ -265,7 +268,6 @@ function plantOne(wallet, plotID, seedID) {
 
     Promise.resolve(resultPromise)
 }
-
 
 
 function getSeedListForRegion(regionName) {
@@ -292,11 +294,12 @@ Promise.all([getOwnedPlots(ACCOUNT),getRentedPlots(ACCOUNT),getSeeds(ACCOUNT)]).
 
     let allPlots = ownedPlots.concat(rentedPlots)
 
-    let waterAllBtn = '<button title="Water All" class="btn btn-primary" id="water-all"><i class="fa-solid fa-hand-holding-droplet"></i> ALL</button>'
+    let waterAllBtn = '<button title="Water All" class="btn btn-primary" id="water-all" disabled="disabled"><i class="fa-solid fa-hand-holding-droplet"></i> ALL</button>'
     let harvestAllBtn = '<button title="Harvest All" class="btn btn-success" id="harvest-all" disabled="disabled"><i class="fa-solid fa-scissors"></i> ALL</button>'
 
     let table_markup = `<thead><th>id</th><th>Region</th><th>Rented To</th><th>Seed ID</th><th>Planted Seed</th><th>Water<br>Needed</th><th>Yield</th><th>Time Left</th><th colspan="3">${waterAllBtn}<br>${harvestAllBtn}<br>Actions</th>`
-
+    document.querySelector('table#plots_table').innerHTML = table_markup
+    table_markup = ''
     var seedsByID = {}
     var seedsByName = {}
     var seedsReady = []
@@ -340,7 +343,7 @@ Promise.all([getOwnedPlots(ACCOUNT),getRentedPlots(ACCOUNT),getSeeds(ACCOUNT)]).
 
         let plantBtn   = ''//'<button title="Plant" class="btn btn-secondary" disabled="disabled"><i class="fa-solid fa-seedling"></i></button>'
         let waterBtn   = ''//`<button title="Water" class="btn btn-primary" disabled="disabled"><i class="fa-solid fa-hand-holding-droplet"></i></button>`
-        let harvestBtn = '<button title="Harvest" class="btn btn-success" disabled="disabled"><i class="fa-solid fa-scissors"></i></button>'
+        let harvestBtn = ''//'<button title="Harvest" class="btn btn-success" disabled="disabled"><i class="fa-solid fa-scissors"></i></button>'
 
         let isRented = plot.properties.RENTED & plot.properties.RENTED === true
         let rentedTo = plot.properties.RENTEDINFO
@@ -355,7 +358,8 @@ Promise.all([getOwnedPlots(ACCOUNT),getRentedPlots(ACCOUNT),getSeeds(ACCOUNT)]).
             if (seedWater !== 0) {
                 totalWaterNeeded += seedWater
                 seedsNeedWater.push(plantedSeedID)
-                waterBtn = ''//`<button title="Water" class="btn btn-primary"><i class="fa-solid fa-hand-holding-droplet"></i></button>`
+                waterBtn = `<button title="Water" class="btn btn-primary"><i class="fa-solid fa-hand-holding-droplet"></i></button>`
+                document.querySelector('button#water-all').removeAttribute('disabled')
             }
 
             // if it's ready to harvest, show a harvest button
@@ -399,7 +403,7 @@ Promise.all([getOwnedPlots(ACCOUNT),getRentedPlots(ACCOUNT),getSeeds(ACCOUNT)]).
     }
 
     // paint the main table
-    document.querySelector('table#plots_table').innerHTML = table_markup
+    document.querySelector('table#plots_table').innerHTML += table_markup
 
     // add click handler for harvest-all button
     //document.querySelector('button#harvest-all').onclick = function () {
