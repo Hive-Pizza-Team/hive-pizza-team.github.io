@@ -30,7 +30,9 @@
     <div class="col-md-4 d-flex align-items-center">
 
       <span class="text-muted">Brought to you by <a href="https://peakd.com/@HiveTrending">@hivetrending</a> and the <a href="https://vote.hive.uno/@pizza.witness">@pizza.witness</a> team.</span>
-    </div>
+  </div>
+      Join us in <a href="https://discord.gg/hivepizza">HivePizza discord</a>
+
   </footer>
     </div>
 
@@ -115,7 +117,6 @@ function getSeeds(account) {
     })
 }
 
-//[{"method":"find","jsonrpc":"2.0","params":{"contract":"nft","table":"HKFARMinstances","query":{"properties.TYPE":"seed","properties.NAME":{"$in":["Acapulco Gold","Blue Dream","Bubblegum","Critical Kush","Shaggi’s Dream","Purple Haze","Snoops Dream"]},"account":"hivetrending"},"limit":1000,"offset":0,"indexes":[]},"id":1}]
 
 function zip(arrays) {
     return arrays[0].map(function(_,i){
@@ -383,8 +384,7 @@ Promise.all([getOwnedPlots(ACCOUNT),getRentedPlots(ACCOUNT),getSeeds(ACCOUNT)]).
                 }
 
                 seedName = `<div class="seeddropdown dropdown">
-              <button class="btn btn-secondary dropdown-toggle btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Select Seed
+              <button class="btn btn-secondary dropdown-toggle btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Select Seed
               </button>
               <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                 ${seedList}
@@ -420,6 +420,7 @@ Promise.all([getOwnedPlots(ACCOUNT),getRentedPlots(ACCOUNT),getSeeds(ACCOUNT)]).
         option.onclick = (e) => {
             let plotID = e.target.getAttribute('data-plot-id')
             let seedID = e.target.getAttribute('data-seed-id')
+            e.target.parentNode.parentNode.children[0].innerHTML = seedID
 
             let plantBtn = document.querySelector(`button#b${plotID}`)
             plantBtn.setAttribute('data-seed-id', seedID)
