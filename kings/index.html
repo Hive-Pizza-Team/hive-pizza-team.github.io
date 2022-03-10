@@ -359,7 +359,7 @@ Promise.all([getOwnedPlots(ACCOUNT),getRentedPlots(ACCOUNT),getSeeds(ACCOUNT)]).
             if (seedWater !== 0) {
                 totalWaterNeeded += seedWater
                 seedsNeedWater.push(plantedSeedID)
-                waterBtn = `<button title="Water" class="btn btn-primary"><i class="fa-solid fa-hand-holding-droplet"></i></button>`
+                waterBtn = `<button title="Water" class="btn btn-primary" onClick="waterMultiple('${ACCOUNT}',[${plantedSeedID}],${totalWaterNeeded})"><i class="fa-solid fa-hand-holding-droplet"></i></button>`
                 document.querySelector('button#water-all').removeAttribute('disabled')
             }
 
@@ -438,53 +438,6 @@ Promise.all([getOwnedPlots(ACCOUNT),getRentedPlots(ACCOUNT),getSeeds(ACCOUNT)]).
     }
 })
 
-
-// plots
-
-/*
-var plots = [
-
-]
-
-// seeds
-var seeds = [
-]
-
-var to_plant = zip([plots, seeds])
-
-console.log(to_plant)
-
-custom_json_id = 'qwoyn_plant_plot'
-
-
-for ([plotID, seedID] of to_plant) {
-    // {"plotID":"2791","seedID":"633616"}
-
-    let json_payload = {'plotID': plotID, 'seedID': seedID}
-
-    json_payload = JSON.stringify(json_payload)
-    console.log(json_payload)
-
-    continue_message = `Are you sure you want to plant seed ${seedID}, on plot ${plotID}`
-    should_continue = window.confirm(continue_message)
-
-    let resultPromise = hive_keychain.requestCustomJson(
-        wallet,
-        custom_json_id,
-        'Active',
-        json_payload,
-        `Planting HK Plots`,
-        function(response) {
-            console.log(response);
-            if (!response['success']) {
-                console.log(`Failure! Keychain failed to authorize the transaction for @${wallet}`)
-            } else {
-                console.log(`Success! Plot planted for @${wallet}`)
-            }
-        }
-    )
-}
-*/
 
 
 </script>
