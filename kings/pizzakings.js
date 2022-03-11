@@ -275,7 +275,6 @@ function plotsAndSeedsUpdate() {
             document.querySelector('div#has-any-seed-changed').setAttribute('data-seeds', JSON.stringify(seeds))
         }
 
-        
         let table_markup = ``
         document.querySelector('table#plots_table tbody').innerHTML = table_markup
         table_markup = ''
@@ -375,7 +374,7 @@ function plotsAndSeedsUpdate() {
                 plantedSeedID = 'Empty'
             }
 
-            table_markup += `<tr><td>${plot._id}</td><td>${plot.properties.NAME}</td><td>${rentedTo ? rentedTo: 'n/a'}</td><td>${plantedSeedID}</td><td>${seedName}</td><td>${seedWater}</td><td>${seedYield}</td><td>${seedTime}</td><td>${plantBtn}</td><td>${waterBtn}</td><td>${harvestBtn}</td></tr>`
+            table_markup += `<tr><td>${plot._id}</td><td>${plot.properties.NAME}</td><td>${rentedTo ? rentedTo: 'n/a'}</td><td>${plantedSeedID}</td><td>${seedName}</td><td>${seedWater}</td><td>${seedYield}</td><td>${seedTime} days</td><td>${plantBtn}</td><td>${waterBtn}</td><td>${harvestBtn}</td></tr>`
         }
 
         // paint the main table
