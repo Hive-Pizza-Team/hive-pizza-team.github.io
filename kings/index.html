@@ -18,7 +18,7 @@
 <body>
 
     <div class="col-lg-8 mx-auto p-3 py-md-5">
-    <h2><img width="8%" src="https://files.peakd.com/file/peakd-hive/dibblers.dabs/23uQNzfZigGqCxZsZS33wLNhi5zprshnmUbRTqFxk5G8whe9peSXPPEC7vEuQ19vXxa9f.png"> Pizza Kings - HashKings Plots</h2>
+    <h1><img width="8%" src="https://files.peakd.com/file/peakd-hive/dibblers.dabs/23uQNzfZigGqCxZsZS33wLNhi5zprshnmUbRTqFxk5G8whe9peSXPPEC7vEuQ19vXxa9f.png"> Pizza Kings</h1>
     <h6>Alpha Testing Notes:</h6>
     <ul>
         <li>Warning: this is untested software. Bugs are rampant.</li>
@@ -26,6 +26,7 @@
         <li>The UI will refresh automatically. After you sign a transaction with Keychain, it can take around 1 minute for the back-end to update.</li>
     </ul>
 
+    <h2>Farm Plots</h2>
     <table id="plots_table" class="table table-striped">
 
     </table>
@@ -327,10 +328,11 @@ function plotsAndSeedsUpdate() {
             document.querySelector('div#has-any-seed-changed').setAttribute('data-seeds', JSON.stringify(seeds))
         }
 
-        let waterAllBtn = '<button title="Water All" class="btn btn-primary" id="water-all" disabled="disabled"><i class="fa-solid fa-hand-holding-droplet"></i> ALL</button>'
-        let harvestAllBtn = '<button title="Harvest All" class="btn btn-success" id="harvest-all" disabled="disabled"><i class="fa-solid fa-scissors"></i> ALL</button>'
+        let waterAllBtn = '<button title="Water All" class="btn btn-sm btn-primary" id="water-all" disabled="disabled"><i class="fa-solid fa-hand-holding-droplet"></i> ALL</button>'
+        let harvestAllBtn = '<button title="Harvest All" class="btn  btn-sm btn-success" id="harvest-all" disabled="disabled"><i class="fa-solid fa-scissors"></i> ALL</button>'
 
-        let table_markup = `<thead><th>id</th><th>Region</th><th>Rented To</th><th>Seed ID</th><th>Planted Seed</th><th>Water<br>Needed</th><th>Yield</th><th>Time Left</th><th colspan="3">${waterAllBtn}<br>${harvestAllBtn}<br>Actions</th>`
+        let table_markup = `<thead><th>Plot ID</th><th>Region</th><th>Rented To</th><th>Seed ID</th><th>Planted Seed</th><th>Water<br>Needed</th><th>Yield</th><th>Time Left</th><th colspan="3">Actions</th></thead>`
+        table_markup += `<tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td colspan="3">${waterAllBtn}<br>${harvestAllBtn}</td></tr>`
         document.querySelector('table#plots_table').innerHTML = table_markup
         table_markup = ''
         var seedsByID = {}
@@ -499,7 +501,7 @@ function avatarsUpdate() {
             return
         }
 
-        let table_markup = `<thead><th>ID</th><th>Owner</th><th>Name</th><th>Power</th><th>Usage</th><th>XP</th>`
+        let table_markup = `<thead><th>ID</th><th>Owner</th><th>Name</th><th>Power</th><th>Usage</th><th>XP</th></thead>`
 
         for (avatar of avatars) {
             table_markup += `<tr><td>${avatar.id}</td><td>${avatar.owner}</td><td>${avatar.properties.NAME}</td><td>${avatar.properties.POWER}</td><td>${avatar.properties.USAGE}</td><td>${avatar.properties.XP}</td></tr>`
