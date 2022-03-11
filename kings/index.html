@@ -331,7 +331,7 @@ function plotsAndSeedsUpdate() {
         let waterAllBtn = '<button title="Water All" class="btn btn-sm btn-primary" id="water-all" disabled="disabled"><i class="fa-solid fa-hand-holding-droplet"></i> ALL</button>'
         let harvestAllBtn = '<button title="Harvest All" class="btn  btn-sm btn-success" id="harvest-all" disabled="disabled"><i class="fa-solid fa-scissors"></i> ALL</button>'
 
-        let table_markup = `<thead><th>Plot ID</th><th>Region</th><th>Rented To</th><th>Seed ID</th><th>Planted Seed</th><th>Water<br>Needed</th><th>Yield</th><th>Time Left</th><th colspan="3">Actions</th></thead>`
+        let table_markup = `<thead><th>Plot ID</th><th>Region</th><th>Rented To</th><th>Seed ID</th><th>Planted Seed</th><th>Water<br>Needed</th><th>Yield</th><th>Time<br>Left</th><th colspan="3">Actions</th></thead>`
         table_markup += `<tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td colspan="3">${waterAllBtn}<br>${harvestAllBtn}</td></tr>`
         document.querySelector('table#plots_table').innerHTML = table_markup
         table_markup = ''
