@@ -275,11 +275,8 @@ function plotsAndSeedsUpdate() {
             document.querySelector('div#has-any-seed-changed').setAttribute('data-seeds', JSON.stringify(seeds))
         }
 
-        let waterAllBtn = '<button title="Water All" class="btn btn-sm btn-primary" id="water-all" disabled="disabled"><i class="fa-solid fa-hand-holding-droplet"></i> ALL</button>'
-        let harvestAllBtn = '<button title="Harvest All" class="btn  btn-sm btn-success" id="harvest-all" disabled="disabled"><i class="fa-solid fa-scissors"></i> ALL</button>'
-
+        
         let table_markup = ``
-        table_markup += `<tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td colspan="3">${waterAllBtn}<br>${harvestAllBtn}</td></tr>`
         document.querySelector('table#plots_table tbody').innerHTML = table_markup
         table_markup = ''
         var seedsByID = {}
