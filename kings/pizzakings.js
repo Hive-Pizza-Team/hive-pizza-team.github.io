@@ -340,6 +340,13 @@ function plotsAndSeedsUpdate() {
                 seedYield = seedsByID[plantedSeedID].properties.PR
                 seedTime  = seedsByID[plantedSeedID].properties.SPT
 
+                if (seedTime !== '') {
+                    seedTime += ' day'
+                }
+                if (seedTime === '0' || parseInt(seedTime) > 1) {
+                    seedTime += 's'
+                }
+
                 if (seedWater !== 0) {
                     totalWaterNeeded += seedWater
                     seedsNeedWater.push(plantedSeedID)
@@ -383,7 +390,7 @@ function plotsAndSeedsUpdate() {
                 plantedSeedID = 'Empty'
             }
 
-            table_markup += `<tr><td>${plot._id}</td><td>${plot.properties.NAME}</td><td>${rentedTo ? rentedTo: 'n/a'}</td><td>${plantedSeedID}</td><td>${seedName}</td><td>${seedWater}</td><td>${seedYield}</td><td>${seedTime} days</td><td>${plantBtn}</td><td>${waterBtn}</td><td>${harvestBtn}</td></tr>`
+            table_markup += `<tr><td>${plot._id}</td><td>${plot.properties.NAME}</td><td>${rentedTo ? rentedTo: 'n/a'}</td><td>${plantedSeedID}</td><td>${seedName}</td><td>${seedWater}</td><td>${seedYield}</td><td>${seedTime}</td><td>${plantBtn}</td><td>${waterBtn}</td><td>${harvestBtn}</td></tr>`
         }
 
         // paint the main table
