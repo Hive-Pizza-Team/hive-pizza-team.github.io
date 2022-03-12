@@ -346,7 +346,7 @@ function plotsAndSeedsUpdate() {
                 if (seedTime !== '') {
                     seedTimeStr += ' day'
                 }
-                if (seedTime === '0' || parseInt(seedTime) > 1) {
+                if (parseInt(seedTime) !== 1) {
                     seedTimeStr += 's'
                 }
 
