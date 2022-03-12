@@ -343,13 +343,13 @@ function plotsAndSeedsUpdate() {
                 if (seedWater !== 0) {
                     totalWaterNeeded += seedWater
                     seedsNeedWater.push(plantedSeedID)
-                    waterBtn = `<button title="Water" class="btn btn-primary" onClick="waterMultiple('${ACCOUNT}',[${plantedSeedID}],${totalWaterNeeded})"><i class="fa-solid fa-hand-holding-droplet"></i></button>`
+                    waterBtn = `<button title="Water" class="btn btn-primary water" data-seed-id="${plantedSeedID}" data-seed-water="${seedWater}"><i class="fa-solid fa-hand-holding-droplet"></i></button>`
                     document.querySelector('button#water-all').removeAttribute('disabled')
                 }
 
                 // if it's ready to harvest, show a harvest button
                 if (seedTime === 0) {
-                    harvestBtn = `<button title="Harvest" class="btn btn-success" onClick="harvestSingle('${ACCOUNT}',${plantedSeedID})"><i class="fa-solid fa-scissors"></i></button>`
+                    harvestBtn = `<button title="Harvest" class="btn btn-success harvest" data-seed-id="${plantedSeedID}"><i class="fa-solid fa-scissors"></i></button>`
                 }
             } else {
                 // if the plot is unoccupied and plantable, show the list of possible seeds
@@ -395,8 +395,9 @@ function plotsAndSeedsUpdate() {
         //}
 
         // add click handler for water-all button
-        document.querySelector('button#water-all').onclick = function () {
+        document.querySelector('button#water-all').onclick = function (e) {
             waterMultiple(ACCOUNT,seedsNeedWater,totalWaterNeeded)
+            e.target.setAttribute('disabled','disabled')
         }
 
         // add click handler for seed dropowns
@@ -418,6 +419,26 @@ function plotsAndSeedsUpdate() {
                 let seedID = e.target.getAttribute('data-seed-id')
 
                 plantOne(ACCOUNT, plotID, seedID)
+                e.target.setAttribute('disabled','disabled')
+            }
+        }
+
+        // add click handler for harvest buttons
+        for (let button of document.querySelectorAll('button.harvest')) {
+            button.onclick = (e) => {
+                let seedID = e.target.getAttribute('data-seed-id')
+                harvestSingle(ACCOUNT, seedID)
+                e.target.setAttribute('disabled','disabled')
+            }
+        }
+
+        // add click handler for water buttons
+        for (let button of document.querySelectorAll('button.water')) {
+            button.onclick = (e) => {
+                let seedID = e.target.getAttribute('data-seed-id')
+                let water = e.target.getAttribute('data-seed-water')
+                waterMultiple(ACCOUNT, [seedID], water)
+                e.target.setAttribute('disabled','disabled')
             }
         }
     })
