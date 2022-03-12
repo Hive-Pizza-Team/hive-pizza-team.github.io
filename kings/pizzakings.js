@@ -325,6 +325,7 @@ function plotsAndSeedsUpdate() {
             let seedWater = ''
             let seedYield = ''
             let seedTime  = ''
+            let seedTimeStr = ''
 
             let plantBtn   = ''//'<button title="Plant" class="btn btn-secondary" disabled="disabled"><i class="fa-solid fa-seedling"></i></button>'
             let waterBtn   = ''//`<button title="Water" class="btn btn-primary" disabled="disabled"><i class="fa-solid fa-hand-holding-droplet"></i></button>`
@@ -339,12 +340,14 @@ function plotsAndSeedsUpdate() {
                 seedWater = seedsByID[plantedSeedID].properties.WATER
                 seedYield = seedsByID[plantedSeedID].properties.PR
                 seedTime  = seedsByID[plantedSeedID].properties.SPT
+                seedTimeStr = seedTime
+
 
                 if (seedTime !== '') {
-                    seedTime += ' day'
+                    seedTimeStr += ' day'
                 }
                 if (seedTime === '0' || parseInt(seedTime) > 1) {
-                    seedTime += 's'
+                    seedTimeStr += 's'
                 }
 
                 if (seedWater !== 0) {
@@ -390,7 +393,7 @@ function plotsAndSeedsUpdate() {
                 plantedSeedID = 'Empty'
             }
 
-            table_markup += `<tr><td>${plot._id}</td><td>${plot.properties.NAME}</td><td>${rentedTo ? rentedTo: 'n/a'}</td><td>${plantedSeedID}</td><td>${seedName}</td><td>${seedWater}</td><td>${seedYield}</td><td>${seedTime}</td><td>${plantBtn}</td><td>${waterBtn}</td><td>${harvestBtn}</td></tr>`
+            table_markup += `<tr><td>${plot._id}</td><td>${plot.properties.NAME}</td><td>${rentedTo ? rentedTo: 'n/a'}</td><td>${plantedSeedID}</td><td>${seedName}</td><td>${seedWater}</td><td>${seedYield}</td><td>${seedTimeStr}</td><td>${plantBtn}</td><td>${waterBtn}</td><td>${harvestBtn}</td></tr>`
         }
 
         // paint the main table
