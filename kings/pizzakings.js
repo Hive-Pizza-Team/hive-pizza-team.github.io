@@ -88,6 +88,11 @@ function zip(arrays) {
 
 
 function harvestSingle(wallet, seedID) {
+
+    if (!seedID) {
+        window.alert('Error! Report in Discord. Harvesting failed because seedID is null')
+    }
+
     continue_message = `Are you sure you want to harvest seed ${seedID}?\n
                         Warning: only harvest each seed once!`
     should_continue = window.confirm(continue_message)
@@ -95,7 +100,6 @@ function harvestSingle(wallet, seedID) {
     if (!should_continue) {
         return
     }
-
 
     custom_json_id = 'ssc-mainnet-hive'
 
@@ -205,7 +209,7 @@ function plantOne(wallet, plotID, seedID) {
     custom_json_id = 'qwoyn_plant_plot'
 
     if (!plotID || !seedID) {
-        window.alert('Error! Report in Discord')
+        window.alert('Error! Report in Discord. Planting failed because plotID or seedID is null')
         return
     }
 
