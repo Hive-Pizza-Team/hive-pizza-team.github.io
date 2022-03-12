@@ -88,6 +88,15 @@ function zip(arrays) {
 
 
 function harvestSingle(wallet, seedID) {
+    continue_message = `Are you sure you want to harvest seed ${seedID}?\n
+                        Warning: only harvest each seed once!`
+    should_continue = window.confirm(continue_message)
+
+    if (!should_continue) {
+        return
+    }
+
+
     custom_json_id = 'ssc-mainnet-hive'
 
     let json_payload = {
