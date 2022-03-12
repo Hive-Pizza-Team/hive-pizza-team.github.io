@@ -1,7 +1,7 @@
 // pizzakings.js
 
 // configuration vars
-const REFRESH_INTERVAL = 5 * 1000 // 5000 ms = 5 s
+const REFRESH_INTERVAL = 3 * 1000 // 3000 ms = 3 s
 const AVATAR_REFRESH_INTERVAL = 60 * 1000 // 60000 ms = 60s
 const DEFAULT_ACCOUNT = 'null'
 const rpc = 'https://api2.hive-engine.com/rpc/contracts';
