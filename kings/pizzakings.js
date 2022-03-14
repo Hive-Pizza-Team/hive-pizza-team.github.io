@@ -450,7 +450,7 @@ function plotsAndSeedsUpdate() {
         // add click handler for water buttons
         for (let button of document.querySelectorAll('button.water')) {
             button.onclick = (e) => {
-                let seedID = e.target.getAttribute('data-seed-id')
+                let seedID = parseInt(e.target.getAttribute('data-seed-id'))
                 let water = e.target.getAttribute('data-seed-water')
                 waterMultiple(ACCOUNT, [seedID], water)
                 e.target.setAttribute('disabled','disabled')
