@@ -91,6 +91,7 @@ function harvestSingle(wallet, seedID) {
 
     if (!seedID) {
         window.alert('Error! Report in Discord. Harvesting failed because seedID is null')
+        return
     }
 
     continue_message = `Are you sure you want to harvest seed ${seedID}?\n
