@@ -366,7 +366,7 @@ function plotsAndSeedsUpdate() {
                 if (seedTime === 0) {
                     harvestBtn = `<button title="Harvest" class="btn btn-success harvest" data-seed-id="${plantedSeedID}"><i class="fa-solid fa-scissors"></i></button>`
                 }
-            } else {
+            } else if (plantedSeedID == 0){
                 // if the plot is unoccupied and plantable, show the list of possible seeds
                 if (!isRented || (isRented && rentedTo === ACCOUNT)) {
                     plantBtn = `<button id="b${plot._id}" title="Plant" class="btn btn-secondary plant" disabled="disabled" data-plot-id="${plot._id}"><i class="fa-solid fa-seedling"></i></button>`
