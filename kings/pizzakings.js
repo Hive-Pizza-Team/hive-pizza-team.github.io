@@ -411,6 +411,10 @@ function plotsAndSeedsUpdate() {
 
         // add click handler for water-all button
         document.querySelector('button#water-all').onclick = function (e) {
+            // if click target is the icon, change target to parent button
+            if (e.target.tagName.toLowerCase() === 'i') {
+                e.target = e.target.parentNode
+            }
             waterMultiple(ACCOUNT,seedsNeedWater,totalWaterNeeded)
             e.target.setAttribute('disabled','disabled')
         }
@@ -430,30 +434,57 @@ function plotsAndSeedsUpdate() {
         // add click handler for plant buttons
         for (let button of document.querySelectorAll('button.plant')) {
             button.onclick = (e) => {
-                let plotID = e.target.getAttribute('data-plot-id')
-                let seedID = e.target.getAttribute('data-seed-id')
+                // if click target is the icon, change target to parent button
+                let buttonTarget;
+                if (e.target.tagName.toLowerCase() === 'i') {
+                    buttonTarget = e.target.parentNode
+                    console.log(buttonTarget)
+                } else {
+                    buttonTarget = e.target
+                }
+
+                let plotID = buttonTarget.getAttribute('data-plot-id')
+                let seedID = buttonTarget.getAttribute('data-seed-id')
 
                 plantOne(ACCOUNT, plotID, seedID)
-                e.target.setAttribute('disabled','disabled')
+                buttonTarget.setAttribute('disabled','disabled')
             }
         }
 
         // add click handler for harvest buttons
         for (let button of document.querySelectorAll('button.harvest')) {
             button.onclick = (e) => {
-                let seedID = e.target.getAttribute('data-seed-id')
+                // if click target is the icon, change target to parent button
+                let buttonTarget;
+                if (e.target.tagName.toLowerCase() === 'i') {
+                    buttonTarget = e.target.parentNode
+                    console.log(buttonTarget)
+                } else {
+                    buttonTarget = e.target
+                }
+
+                let seedID = buttonTarget.getAttribute('data-seed-id')
                 harvestSingle(ACCOUNT, seedID)
-                e.target.setAttribute('disabled','disabled')
+                buttonTarget.setAttribute('disabled','disabled')
             }
         }
 
         // add click handler for water buttons
         for (let button of document.querySelectorAll('button.water')) {
             button.onclick = (e) => {
-                let seedID = parseInt(e.target.getAttribute('data-seed-id'))
-                let water = e.target.getAttribute('data-seed-water')
+                // if click target is the icon, change target to parent button
+                let buttonTarget;
+                if (e.target.tagName.toLowerCase() === 'i') {
+                    buttonTarget = e.target.parentNode
+                    console.log(buttonTarget)
+                } else {
+                    buttonTarget = e.target
+                }
+
+                let seedID = parseInt(buttonTarget.getAttribute('data-seed-id'))
+                let water = buttonTarget.getAttribute('data-seed-water')
                 waterMultiple(ACCOUNT, [seedID], water)
-                e.target.setAttribute('disabled','disabled')
+                buttonTarget.setAttribute('disabled','disabled')
             }
         }
     })
