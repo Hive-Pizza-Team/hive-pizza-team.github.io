@@ -577,7 +577,6 @@ function enterNextRaid(wallet, avatarID, raidID, avatarName, raidName) {
     }
 
     let custom_json_id = 'qwoyn_avatars_onraid'
-    //let json_payload = {'plotID': plotID, 'seedID': seedID}
     let json_payload = {'raid':raidID,'avatar':[avatarID]}
 
     json_payload = JSON.stringify(json_payload)
@@ -632,7 +631,6 @@ function avatarsUpdate() {
                 for (raid_avatar of raid['avatares']) {
                     if (parseInt(raid_avatar['avatar']) === avatar.id) {
                         assigned_raid_id = raid['boss']
-                        console.log(raid)
                     }
                 }
             }
