@@ -583,7 +583,7 @@ function enterNextRaid(wallet, avatarID, raidID, avatarName, raidName) {
     console.log(json_payload)
 
     continue_message = `Are you sure you want to enter avatar ${avatarName} (${avatarID}), in raid ${raidName} (${raidID})?\n
-                        Warning: only enter each raid once!`
+                        Warning: only enter each avatar once!`
     should_continue = window.confirm(continue_message)
 
     if (!should_continue) {
@@ -642,7 +642,7 @@ function avatarsUpdate() {
             
             let avatar_actions = ''
             if (assigned_raid_id === 'None') {
-                avatar_actions = `<button class="btn btn-sm btn-primary enter-raid" data-avatar-id="${avatar.id}" data-raid-id="${next_raid_id}" data-avatar-name="${avatar.properties.NAME}" data-raid-name="${next_raid_name}">Enter next raid</button>`
+                avatar_actions = `<button class="btn btn-sm btn-danger enter-raid" title="Enter Next Raid" data-avatar-id="${avatar.id}" data-raid-id="${next_raid_id}" data-avatar-name="${avatar.properties.NAME}" data-raid-name="${next_raid_name}"><i class="fa-solid fa-person-rifle"></i></button>`
             }
             table_markup += `<tr><td>${avatar.id}</td><td>${avatar.owner}</td><td>${avatar.properties.NAME}</td><td>${avatarRarities[avatar.properties.NAME]}</td><td>${avatar.properties.POWER.toFixed(3)}</td><td>${raid_power.toFixed(3)}</td><td>${avatar.properties.USAGE}</td><td>${avatar.properties.XP.toFixed(3)}</td><td>${assigned_raid_id}</td><td>${avatar_actions}</td></tr>`
         }
