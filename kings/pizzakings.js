@@ -515,9 +515,9 @@ avatarRarities = {
     "Water Baroness Maggi": "common",
     "Water Baron Shaggi": "common",
     "Fly-bot": "common",
-    Bucketbot: "common",
+    "Bucketbot": "common",
     "Plank-279": "common",
-    Trunkset: "common",
+    "Trunkset": "common",
     "Airhead Lieutenant": "rare",
     "Captain Puffs": "rare",
     "Colonel Cockroach": "rare",
@@ -556,9 +556,65 @@ function getAvatars(wallet) {
 }
 
 
+function getRaids() {
+    let api = `https://hashkings.xyz/raids`
+
+    return new Promise((resolve, reject) => {
+        axios.get(api).then((result) => {
+            return resolve(result.data.raids)
+        }).catch((err) => {
+            console.log(err)
+            return reject(err)
+        })
+     })
+}
+
+
+function enterNextRaid(wallet, avatarID, raidID, avatarName, raidName) {
+    if (!avatarID || !raidID) {
+        window.alert('Error! Report in Discord. Raiding failed because avatarID or raidID is null')
+        return
+    }
+
+    let custom_json_id = 'qwoyn_avatars_onraid'
+    //let json_payload = {'plotID': plotID, 'seedID': seedID}
+    let json_payload = {'raid':raidID,'avatar':[avatarID]}
+
+    json_payload = JSON.stringify(json_payload)
+    console.log(json_payload)
+
+    continue_message = `Are you sure you want to enter avatar ${avatarName} (${avatarID}), in raid ${raidName} (${raidID})?\n
+                        Warning: only enter each raid once!`
+    should_continue = window.confirm(continue_message)
+
+    if (!should_continue) {
+        return
+    }
+
+    let resultPromise = hive_keychain.requestCustomJson(
+        wallet,
+        custom_json_id,
+        'Active',
+        json_payload,
+        `Entering Avatar into ${raidName} raid`,
+        function(response) {
+            console.log(response);
+            if (!response['success']) {
+                console.log(`Failure! Keychain failed to authorize the transaction for @${wallet}`)
+            } else {
+                console.log(`Success! Raid entered for @${wallet}`)
+            }
+        }
+    )
+
+    Promise.resolve(resultPromise)
+}
+
+
 function avatarsUpdate() {
-    Promise.all([getAvatars(ACCOUNT)]).then( (values) => {
-        let [avatars] = values
+    Promise.all([getAvatars(ACCOUNT),getRaids()]).then( (values) => {
+        let [avatars, raids] = values
+        
         let hasAvatarDataChanged = JSON.stringify(avatars) !== document.querySelector('div#has-any-avatar-changed').getAttribute('data-avatars')
 
         if (hasAvatarDataChanged) {
@@ -570,13 +626,52 @@ function avatarsUpdate() {
 
         let table_markup = ''
         for (avatar of avatars) {
+
+            let assigned_raid_id = 'None'
+            for (raid of raids) {
+                for (raid_avatar of raid['avatares']) {
+                    if (parseInt(raid_avatar['avatar']) === avatar.id) {
+                        assigned_raid_id = raid['boss']
+                        console.log(raid)
+                    }
+                }
+            }
+
+
             let raid_power = avatar.properties.XP * avatar.properties.POWER / 100
-            let avatar_actions = `<button class="btn btn-sm btn-primary" disabled="disabled">Enter next raid</button>`
-            table_markup += `<tr><td>${avatar.id}</td><td>${avatar.owner}</td><td>${avatar.properties.NAME}</td><td>${avatarRarities[avatar.properties.NAME]}</td><td>${avatar.properties.POWER.toFixed(3)}</td><td>${raid_power.toFixed(3)}</td><td>${avatar.properties.USAGE}</td><td>${avatar.properties.XP.toFixed(3)}</td><td>${avatar_actions}</td></tr>`
+            let next_raid_id = raids[0]['_id']
+            let next_raid_name = raids[0]['boss']
+            
+            let avatar_actions = ''
+            if (assigned_raid_id === 'None') {
+                avatar_actions = `<button class="btn btn-sm btn-primary enter-raid" data-avatar-id="${avatar.id}" data-raid-id="${next_raid_id}" data-avatar-name="${avatar.properties.NAME}" data-raid-name="${next_raid_name}">Enter next raid</button>`
+            }
+            table_markup += `<tr><td>${avatar.id}</td><td>${avatar.owner}</td><td>${avatar.properties.NAME}</td><td>${avatarRarities[avatar.properties.NAME]}</td><td>${avatar.properties.POWER.toFixed(3)}</td><td>${raid_power.toFixed(3)}</td><td>${avatar.properties.USAGE}</td><td>${avatar.properties.XP.toFixed(3)}</td><td>${assigned_raid_id}</td><td>${avatar_actions}</td></tr>`
         }
 
         // paint the avatars table
         document.querySelector('table#avatars_table tbody').innerHTML = table_markup
+
+        // add event handlers for avatar actions
+        for (let button of document.querySelectorAll('button.enter-raid')) {
+            button.onclick = (e) => {
+                // if click target is the icon, change target to parent button
+                let buttonTarget;
+                if (e.target.tagName.toLowerCase() === 'i') {
+                    buttonTarget = e.target.parentNode
+                    console.log(buttonTarget)
+                } else {
+                    buttonTarget = e.target
+                }
+
+                let avatarID = parseInt(buttonTarget.getAttribute('data-avatar-id'))
+                let raidID = buttonTarget.getAttribute('data-raid-id')
+                let avatarName = buttonTarget.getAttribute('data-avatar-name')
+                let raidName = buttonTarget.getAttribute('data-raid-name')
+                enterNextRaid(ACCOUNT, avatarID, raidID, avatarName, raidName)
+                buttonTarget.setAttribute('disabled','disabled')
+            }
+        }
     })
 }
 
