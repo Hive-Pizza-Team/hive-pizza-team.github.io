@@ -146,12 +146,16 @@ function harvestSingle(wallet, seedID) {
 function harvestMultiple(wallet, seedIDs) {
 
     if (seedIDs.length == 0) {
-        window.alert('Nothing to harvest!')
+        window.alert(`Nothing to harvest! `)
         return
     }
 
-    window.alert('Not implemented!')
-    return
+    window.alert(`Not implemented! ${seedIDs}`)
+    
+    //for (seedID of seedIDs) {
+    //    harvestSingle(wallet, seedID)
+    //}
+    
 }
 
 
@@ -364,6 +368,7 @@ function plotsAndSeedsUpdate() {
 
                 // if it's ready to harvest, show a harvest button
                 if (seedTime === 0) {
+                    //document.querySelector('#harvest-all').removeAttribute('disabled')
                     harvestBtn = `<button title="Harvest" class="btn btn-success harvest" data-seed-id="${plantedSeedID}"><i class="fa-solid fa-scissors"></i></button>`
                 }
             } else if (plantedSeedID == 0){
@@ -405,9 +410,9 @@ function plotsAndSeedsUpdate() {
         document.querySelector('table#plots_table tbody').innerHTML = table_markup
 
         // add click handler for harvest-all button
-        //document.querySelector('button#harvest-all').onclick = function () {
-        //    harvestMultiple(ACCOUNT,seedsReady)
-        //}
+        document.querySelector('button#harvest-all').onclick = function () {
+            harvestMultiple(ACCOUNT,seedsReady)
+        }
 
         // add click handler for water-all button
         document.querySelector('button#water-all').onclick = function (e) {
@@ -566,7 +571,8 @@ function avatarsUpdate() {
         let table_markup = ''
         for (avatar of avatars) {
             let raid_power = avatar.properties.XP * avatar.properties.POWER / 100
-            table_markup += `<tr><td>${avatar.id}</td><td>${avatar.owner}</td><td>${avatar.properties.NAME}</td><td>${avatarRarities[avatar.properties.NAME]}</td><td>${avatar.properties.POWER.toFixed(3)}</td><td>${raid_power.toFixed(3)}</td><td>${avatar.properties.USAGE}</td><td>${avatar.properties.XP.toFixed(3)}</td></tr>`
+            let avatar_actions = `<button class="btn btn-sm btn-primary" disabled="disabled">Enter next raid</button>`
+            table_markup += `<tr><td>${avatar.id}</td><td>${avatar.owner}</td><td>${avatar.properties.NAME}</td><td>${avatarRarities[avatar.properties.NAME]}</td><td>${avatar.properties.POWER.toFixed(3)}</td><td>${raid_power.toFixed(3)}</td><td>${avatar.properties.USAGE}</td><td>${avatar.properties.XP.toFixed(3)}</td><td>${avatar_actions}</td></tr>`
         }
 
         // paint the avatars table
