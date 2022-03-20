@@ -412,11 +412,14 @@ function plotsAndSeedsUpdate() {
         // add click handler for water-all button
         document.querySelector('button#water-all').onclick = function (e) {
             // if click target is the icon, change target to parent button
+            let buttonTarget;
             if (e.target.tagName.toLowerCase() === 'i') {
-                e.target = e.target.parentNode
+                buttonTarget = e.target.parentNode
+            } else {
+                buttonTarget = e.target
             }
             waterMultiple(ACCOUNT,seedsNeedWater,totalWaterNeeded)
-            e.target.setAttribute('disabled','disabled')
+            buttonTarget.setAttribute('disabled','disabled')
         }
 
         // add click handler for seed dropowns
@@ -438,7 +441,6 @@ function plotsAndSeedsUpdate() {
                 let buttonTarget;
                 if (e.target.tagName.toLowerCase() === 'i') {
                     buttonTarget = e.target.parentNode
-                    console.log(buttonTarget)
                 } else {
                     buttonTarget = e.target
                 }
@@ -458,7 +460,6 @@ function plotsAndSeedsUpdate() {
                 let buttonTarget;
                 if (e.target.tagName.toLowerCase() === 'i') {
                     buttonTarget = e.target.parentNode
-                    console.log(buttonTarget)
                 } else {
                     buttonTarget = e.target
                 }
@@ -490,6 +491,52 @@ function plotsAndSeedsUpdate() {
     })
 }
 
+
+avatarRarities = {
+    "Japot Flowerpot": "common",
+    "Steve Stub": "common",
+    "Ted Hunted": "common",
+    "Timmy Open-Mind": "common",
+    "Mildred Hunted": "common",
+    "Ester Planter": "common",
+    "Jaine Migraine": "common",
+    "Julia Cadaverts": "common",
+    "Scientist Maggi": "common",
+    "Scientist Shaggi": "common",
+    "Farmer Maggi": "common",
+    "Farmer Shaggi": "common",
+    "Lucky Maggi": "common",
+    "Lucky Shaggi": "common",
+    "Water Baroness Maggi": "common",
+    "Water Baron Shaggi": "common",
+    "Fly-bot": "common",
+    Bucketbot: "common",
+    "Plank-279": "common",
+    Trunkset: "common",
+    "Airhead Lieutenant": "rare",
+    "Captain Puffs": "rare",
+    "Colonel Cockroach": "rare",
+    "Captain Jainer Strainer": "rare",
+    "Carla. War Nurse": "rare",
+    "Lieutenant O'Weed": "rare",
+    "Magical Maggi": "rare",
+    "Magical Shaggi": "rare",
+    "OX-64": "rare",
+    "L-417": "rare",
+    "Scarebot-2088": "rare",
+    "General Hockey-Pockey": "epic",
+    "General Spice-Skunk": "epic",
+    "Colonel White Widow": "epic",
+    "Colonel \xc1ngeles Heartless": "epic",
+    "The heavy Johnny- Mark-2": "epic",
+    "Tank-420": "epic",
+    "The Cannabi-Zombie King": "legendary",
+    "The Cannabi-Zombie Queen": "legendary",
+    "Spikebot-209": "legendary",
+    "Spikebot-208": "legendary"
+}
+
+
 function getAvatars(wallet) {
     let api = `https://hashkings.xyz/userdata/${wallet}`
 
@@ -518,7 +565,8 @@ function avatarsUpdate() {
 
         let table_markup = ''
         for (avatar of avatars) {
-            table_markup += `<tr><td>${avatar.id}</td><td>${avatar.owner}</td><td>${avatar.properties.NAME}</td><td>${avatar.properties.POWER}</td><td>${avatar.properties.USAGE}</td><td>${avatar.properties.XP}</td></tr>`
+            let raid_power = avatar.properties.XP * avatar.properties.POWER / 100
+            table_markup += `<tr><td>${avatar.id}</td><td>${avatar.owner}</td><td>${avatar.properties.NAME}</td><td>${avatarRarities[avatar.properties.NAME]}</td><td>${avatar.properties.POWER.toFixed(3)}</td><td>${raid_power.toFixed(3)}</td><td>${avatar.properties.USAGE}</td><td>${avatar.properties.XP.toFixed(3)}</td></tr>`
         }
 
         // paint the avatars table
