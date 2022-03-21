@@ -234,7 +234,7 @@ function plantOne(wallet, plotID, seedID) {
     let resultPromise = hive_keychain.requestCustomJson(
         wallet,
         custom_json_id,
-        'Active',
+        'Posting',
         json_payload,
         `Planting HK Plots`,
         function(response) {
@@ -593,7 +593,7 @@ function enterNextRaid(wallet, avatarID, raidID, avatarName, raidName) {
     let resultPromise = hive_keychain.requestCustomJson(
         wallet,
         custom_json_id,
-        'Active',
+        'Posting',
         json_payload,
         `Entering Avatar into ${raidName} raid`,
         function(response) {
