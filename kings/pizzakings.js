@@ -610,6 +610,14 @@ function enterNextRaid(wallet, avatarID, raidID, avatarName, raidName) {
 }
 
 
+function getAvatarLevel(avatar) {
+    let e = parseInt(avatar.properties.XP)
+    for (var t = 0, a = 45, n = 45; n < e; )
+        ++t < 100 ? n = (a *= 1.08) + n : t > 100 && t < 200 ? n = (a *= 1.04) + n : t > 200 && (n = (a *= 1.02) + n);
+    return t
+}
+
+
 function avatarsUpdate() {
     Promise.all([getAvatars(ACCOUNT),getRaids()]).then( (values) => {
         let [avatars, raids] = values
@@ -637,14 +645,19 @@ function avatarsUpdate() {
 
 
             let raid_power = avatar.properties.XP * avatar.properties.POWER / 100
-            let next_raid_id = raids[0]['_id']
-            let next_raid_name = raids[0]['boss']
-            
             let avatar_actions = ''
-            if (assigned_raid_id === 'None') {
-                avatar_actions = `<button class="btn btn-sm btn-danger enter-raid" title="Enter Next Raid" data-avatar-id="${avatar.id}" data-raid-id="${next_raid_id}" data-avatar-name="${avatar.properties.NAME}" data-raid-name="${next_raid_name}"><i class="fa-solid fa-person-rifle"></i></button>`
+
+            // find appropriate raid for avatar's level
+            if (getAvatarLevel(avatar) <= 25) {
+
+                let next_raid_id = raids[0]['_id']
+                let next_raid_name = raids[0]['boss']
+
+                if (assigned_raid_id === 'None') {
+                    avatar_actions = `<button class="btn btn-sm btn-danger enter-raid" title="Enter Next Raid" data-avatar-id="${avatar.id}" data-raid-id="${next_raid_id}" data-avatar-name="${avatar.properties.NAME}" data-raid-name="${next_raid_name}"><i class="fa-solid fa-person-rifle"></i></button>`
+                }
             }
-            table_markup += `<tr><td>${avatar.id}</td><td>${avatar.owner}</td><td>${avatar.properties.NAME}</td><td>${avatarRarities[avatar.properties.NAME]}</td><td>${avatar.properties.POWER.toFixed(3)}</td><td>${raid_power.toFixed(3)}</td><td>${avatar.properties.USAGE}</td><td>${avatar.properties.XP.toFixed(3)}</td><td>${assigned_raid_id}</td><td>${avatar_actions}</td></tr>`
+            table_markup += `<tr><td>${avatar.id}</td><td>${avatar.owner}</td><td>${avatar.properties.NAME}</td><td>${avatarRarities[avatar.properties.NAME]}</td><td>${avatar.properties.POWER.toFixed(3)}</td><td>${raid_power.toFixed(3)}</td><td>${avatar.properties.USAGE}</td><td>${avatar.properties.XP.toFixed(3)}</td><td>${getAvatarLevel(avatar)}</td><td>${assigned_raid_id}</td><td>${avatar_actions}</td></tr>`
         }
 
         // paint the avatars table
