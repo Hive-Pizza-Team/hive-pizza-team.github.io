@@ -270,6 +270,7 @@ function getSeedListForRegion(regionName) {
 }
 
 
+
 function plotsAndSeedsUpdate() {
     Promise.all([getOwnedPlots(ACCOUNT),getRentedPlots(ACCOUNT),getSeeds(ACCOUNT)]).then( (values) => {
         let [ownedPlots, rentedPlots, seeds] = values
@@ -285,6 +286,21 @@ function plotsAndSeedsUpdate() {
 
         if (hasPlotDataChanged)  {
             console.log('Plot data changed. Updating UI.')
+
+            /*let oldPlotsData = document.querySelector('div#has-any-plot-changed').getAttribute('data-plots')
+            let oldPlots = []
+            if (oldPlotsData) {
+                oldPlots = JSON.parse(oldPlotsData)
+            }
+
+            for (newPlot of allPlots) {
+                for (oldPlot of oldPlots) {
+                    if (oldPlot._id === newPlot._id && oldPlot != newPlot) {
+                        console.log(`PlotID ${newPlot._id} changed`)
+                    }
+                }
+            }*/
+
             document.querySelector('div#has-any-plot-changed').setAttribute('data-plots', JSON.stringify(allPlots))
         }
 
@@ -403,7 +419,7 @@ function plotsAndSeedsUpdate() {
                 plantedSeedID = 'Empty'
             }
 
-            table_markup += `<tr><td>${plot._id}</td><td>${plot.properties.NAME}</td><td>${rentedTo ? rentedTo: 'n/a'}</td><td>${plantedSeedID}</td><td>${seedName}</td><td>${seedWater}</td><td>${seedYield}</td><td>${seedTimeStr}</td><td>${plantBtn}</td><td>${waterBtn}</td><td>${harvestBtn}</td></tr>`
+            table_markup += `<tr id="${plot._id}"><td>${plot._id}</td><td>${plot.properties.NAME}</td><td>${rentedTo ? rentedTo: 'n/a'}</td><td>${plantedSeedID}</td><td>${seedName}</td><td>${seedWater}</td><td>${seedYield}</td><td>${seedTimeStr}</td><td>${plantBtn}</td><td>${waterBtn}</td><td>${harvestBtn}</td></tr>`
         }
 
         // paint the main table
@@ -623,12 +639,20 @@ function avatarsUpdate() {
         let [avatars, raids] = values
         
         let hasAvatarDataChanged = JSON.stringify(avatars) !== document.querySelector('div#has-any-avatar-changed').getAttribute('data-avatars')
+        let hasRaidDataChanged = JSON.stringify(raids) !== document.querySelector('div#has-any-raid-changed').getAttribute('data-raids')
 
-        if (hasAvatarDataChanged) {
+        if (!hasAvatarDataChanged && !hasRaidDataChanged) {
+            return
+        }
+
+        if (!hasAvatarDataChanged) {
             console.log('Avatar data changed. Updating UI.')
             document.querySelector('div#has-any-avatar-changed').setAttribute('data-avatars', JSON.stringify(avatars))
-        } else {
-            return
+        }
+
+        if (!hasRaidDataChanged) {
+            console.log('Raid data changed. Updating UI.')
+            document.querySelector('div#has-any-raid-changed').setAttribute('data-raids', JSON.stringify(raids))
         }
 
         let table_markup = ''
