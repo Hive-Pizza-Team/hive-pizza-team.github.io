@@ -59,17 +59,31 @@ function getRentedPlots(account) {
 
 function getSeeds(account) {
     return new Promise((resolve, reject) => {
-        const query = {'id': 1,
-                       'jsonrpc': '2.0',
-                       'method': 'find',
-                       'params': {
-                            'contract': 'nft',
-                            'table': 'HKFARMinstances',
-                            'query': {
-                                'properties.TYPE': 'seed',
-                                'account': account
-                            }
-                        }}
+        let query = ''
+        if (account) {
+            query = {'id': 1,
+               'jsonrpc': '2.0',
+               'method': 'find',
+               'params': {
+                    'contract': 'nft',
+                    'table': 'HKFARMinstances',
+                    'query': {
+                        'properties.TYPE': 'seed',
+                        'account': account
+                    }
+                }}
+        } else {
+            query = {'id': 1,
+               'jsonrpc': '2.0',
+               'method': 'find',
+               'params': {
+                    'contract': 'nft',
+                    'table': 'HKFARMinstances',
+                    'query': {
+                        'properties.TYPE': 'seed'
+                    }
+                }}
+        }
         axios.post(rpc, query).then((result) => {
             return resolve(result.data.result)
         }).catch((err) => {
@@ -419,7 +433,7 @@ function plotsAndSeedsUpdate() {
                 plantedSeedID = 'Empty'
             }
 
-            table_markup += `<tr id="${plot._id}"><td>${plot._id}</td><td>${plot.properties.NAME}</td><td>${rentedTo ? rentedTo: 'n/a'}</td><td>${plantedSeedID}</td><td>${seedName}</td><td>${seedWater}</td><td>${seedYield}</td><td>${seedTimeStr}</td><td>${plantBtn}</td><td>${waterBtn}</td><td>${harvestBtn}</td></tr>`
+            table_markup += `<tr id="${plot._id}"><td>${plot._id}</td><td>${plot.properties.NAME}</td><td>${plot.account} ~ ${rentedTo ? rentedTo: 'n/a'}</td><td>${plantedSeedID}</td><td>${seedName}</td><td>${seedWater}</td><td>${seedYield}</td><td>${seedTimeStr}</td><td>${plantBtn}</td><td>${waterBtn}</td><td>${harvestBtn}</td></tr>`
         }
 
         // paint the main table
