@@ -685,11 +685,55 @@ function avatarsUpdate() {
             let raid_power = avatar.properties.XP * avatar.properties.POWER / 100
             let avatar_actions = ''
 
-            // find appropriate raid for avatar's level
-            if (getAvatarLevel(avatar) <= 25) {
 
-                let next_raid_id = raids[0]['_id']
-                let next_raid_name = raids[0]['boss']
+            let findRaidForAvatar = (avatar, raids) => {
+                let raidMax25 = {}
+                let raidMax50 = {}
+                let raidMax75 = {}
+                let raidMax100 = {}
+                let raidMax9999 = {}
+
+                for (raid of raids) {
+                    switch(raid.lvl) {
+                        case '25':
+                            raidMax25 = raid
+                            break
+                        case '50':
+                            raidMax50 = raid
+                            break
+                        case '75':
+                            raidMax75 = raid
+                            break
+                        case '100':
+                            raidMax100 = raid
+                            break
+                        case '9999':
+                            raidMax9999 = raid
+                            break
+                    }
+                }
+                let avatarLevel = getAvatarLevel(avatar)
+                if (avatarLevel <= 25) {
+                    return raidMax25
+                } else if (avatarLevel <= 50) {
+                    return raidMax50
+                } else if (avatarLevel <= 75) {
+                    return raidMa75
+                } else if (avatarLevel <= 100) {
+                    return raidMax100
+                } else if (avatarLevel <= 9999) {
+                    return raidMax9999
+                } else {
+                    return {}
+                }
+            }
+
+            // find appropriate raid for avatar's level
+            let matchedRaid = findRaidForAvatar(avatar, raids)
+            if (matchedRaid) {
+
+                let next_raid_id = matchedRaid['_id']
+                let next_raid_name = matchedRaid['boss']
 
                 if (assigned_raid_id === 'None') {
                     avatar_actions = `<button class="btn btn-sm btn-danger enter-raid" title="Enter Next Raid" data-avatar-id="${avatar.id}" data-raid-id="${next_raid_id}" data-avatar-name="${avatar.properties.NAME}" data-raid-name="${next_raid_name}"><i class="fa-solid fa-person-rifle"></i></button>`
