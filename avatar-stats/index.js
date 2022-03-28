@@ -26,23 +26,36 @@ function getAvatar(id) {
     })
 }
 
-Promise.resolve(getAvatar(avatar_id)).then( (res) => {
-    console.log(res)
+function getAvatarLevel(avatar) {
+    let e = parseInt(avatar.properties.XP)
+    for (var t = 0, a = 45, n = 45; n < e; )
+        ++t < 100 ? n = (a *= 1.08) + n : t > 100 && t < 200 ? n = (a *= 1.04) + n : t > 200 && (n = (a *= 1.02) + n);
+    return t
+}
 
-    for (attribute in res[0]) {
+Promise.resolve(getAvatar(avatar_id)).then( (res) => {
+    let avatar = res[0]
+
+    for (attribute in avatar) {
         
 
+
         if (attribute === 'properties') {
-            let properties = res[0]['properties']
+            let properties = avatar['properties']
             for (attribute2 in properties) {
 
                 document.querySelector('div#avatar_content').innerHTML += attribute2 + ' : ' + JSON.stringify(properties[attribute2]) + '<br>'
 
             }
         } else {
-            document.querySelector('div#avatar_content').innerHTML += attribute + ' : ' + JSON.stringify(res[0][attribute]) + '<br>'
+            document.querySelector('div#avatar_content').innerHTML += attribute + ' : ' + JSON.stringify(avatar[attribute]) + '<br>'
         }
     }
+
+    let raid_power = avatar.properties.XP * avatar.properties.POWER / 100
+    let level = getAvatarLevel(avatar)
+    document.querySelector('div#avatar_content').innerHTML += 'RAID POWER' + ' : ' + JSON.stringify(raid_power) + '<br>'
+    document.querySelector('div#avatar_content').innerHTML += 'LEVEL' + ' : ' + JSON.stringify(level) + '<br>'
 
     
 })
