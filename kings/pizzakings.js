@@ -164,11 +164,63 @@ function harvestMultiple(wallet, seedIDs) {
         return
     }
 
-    window.alert(`Not implemented! ${seedIDs}`)
+    //window.alert(`Not implemented! ${seedIDs}`)
+
+    if (seedIDs.length > 20) {
+        window.alert('Warning: only the first 20 seeds will be harvested.')
+        seedIDs.splice(20)
+    }
     
-    //for (seedID of seedIDs) {
-    //    harvestSingle(wallet, seedID)
-    //}
+    continue_message = `Are you sure you want to harvest seeds ${JSON.stringify(seedIDs)}?\n
+                        Warning: only harvest each seed once!`
+    should_continue = window.confirm(continue_message)
+
+    if (!should_continue) {
+        return
+    }
+
+    custom_json_id = 'ssc-mainnet-hive'
+
+    let json_payload = []
+
+    for (seedID of seedIDs) {
+        json_payload.push({
+            'contractName': 'nft',
+            'contractAction': 'transfer',
+            'contractPayload':{
+                'to':'hk-vault',
+                'nfts':[
+                    {'symbol':'HKFARM',
+                     'ids':[
+                        String(seedID)
+                      ]
+                    }
+                ]
+            }
+        })
+    }
+    json_payload = JSON.stringify(json_payload)
+
+
+    console.log(json_payload)
+
+    let resultPromise = hive_keychain.requestCustomJson(
+        wallet,
+        custom_json_id,
+        'Active',
+        json_payload,
+        `Harvesting HK Plot for Seeds ${JSON.stringify(seedIDs)}`,
+        function(response) {
+            console.log(response);
+            if (!response['success']) {
+                console.log(`Failure! Keychain failed to authorize the transaction for @${wallet}`)
+            } else {
+                console.log(`Success! Plots harvested for @${wallet}`)
+            }
+        }
+    )
+
+    Promise.resolve(resultPromise)
     
 }
 
@@ -398,7 +450,7 @@ function plotsAndSeedsUpdate() {
 
                 // if it's ready to harvest, show a harvest button
                 if (seedTime === 0) {
-                    //document.querySelector('#harvest-all').removeAttribute('disabled')
+                    document.querySelector('#harvest-all').removeAttribute('disabled')
                     harvestBtn = `<button title="Harvest" class="btn btn-success harvest" data-seed-id="${plantedSeedID}"><i class="fa-solid fa-scissors"></i></button>`
                 }
             } else if (plantedSeedID == 0){
@@ -731,7 +783,6 @@ function avatarsUpdate() {
             // find appropriate raid for avatar's level
             let matchedRaid = findRaidForAvatar(avatar, raids)
             if (matchedRaid) {
-
                 let next_raid_id = matchedRaid['_id']
                 let next_raid_name = matchedRaid['boss']
 
