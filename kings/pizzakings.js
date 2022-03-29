@@ -164,8 +164,6 @@ function harvestMultiple(wallet, seedIDs) {
         return
     }
 
-    //window.alert(`Not implemented! ${seedIDs}`)
-
     if (seedIDs.length > 20) {
         window.alert('Warning: only the first 20 seeds will be harvested.')
         seedIDs.splice(20)
@@ -770,7 +768,7 @@ function avatarsUpdate() {
                 } else if (avatarLevel <= 50) {
                     return raidMax50
                 } else if (avatarLevel <= 75) {
-                    return raidMa75
+                    return raidMax75
                 } else if (avatarLevel <= 100) {
                     return raidMax100
                 } else if (avatarLevel <= 9999) {
