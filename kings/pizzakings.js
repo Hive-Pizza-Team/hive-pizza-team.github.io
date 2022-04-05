@@ -623,7 +623,7 @@ avatarRarities = {
 
 
 function getAvatars(wallet) {
-    let api = `https://hashkings.xyz/userdata/${wallet}`
+    let api = `https://hashkings.info/userdata/${wallet}`
 
     return new Promise((resolve, reject) => {
         axios.get(api).then((result) => {
@@ -637,7 +637,7 @@ function getAvatars(wallet) {
 
 
 function getRaids() {
-    let api = `https://hashkings.xyz/raids`
+    let api = `https://hashkings.info/raids`
 
     return new Promise((resolve, reject) => {
         axios.get(api).then((result) => {
