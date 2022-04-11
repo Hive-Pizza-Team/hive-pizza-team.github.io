@@ -230,6 +230,11 @@ function waterMultiple(wallet, seedIDs, totalWaterNeeded) {
         return
     }
 
+    if (seedIDs.length > 20) {
+        window.alert('Error: cannot water more than 20 seeds at once.')
+        return
+    }
+
     continue_message = `Are you sure you want to burn ${totalWaterNeeded} HKWATER to water seeds?: ${seedIDs}?`
     should_continue = window.confirm(continue_message)
 
