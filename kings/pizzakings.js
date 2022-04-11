@@ -323,7 +323,7 @@ function getSeedListForRegion(regionName) {
     } else if (regionName === 'Africa') {
         return ['Swazi Gold','Kilimanjaro','Durban Poison','Malawi']
     } else if (regionName === 'Afghanistan') {
-        return ['Hindu Kush','Afghani Kush','Lashkar Gah','Mazar I Sharif']
+        return ['Hindu Kush','Afghani','Lashkar Gah','Mazar I Sharif']
     } else if (regionName === 'Mexico') {
         return ['Acapulco Gold']
     } else if (regionName === 'South America') {
