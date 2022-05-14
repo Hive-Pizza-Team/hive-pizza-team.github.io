@@ -96,7 +96,7 @@ function getSeeds(account, region) {
         query.params.query['$or'] = [{'properties.NAME' : seedsForRegion[0]}, {'properties.NAME' : seedsForRegion[1]}]
     }
 
-    return axios.post(rpc, query)
+    return axios.post(rpc, query).then((result) => {return result.data.result})
 }
 
 
@@ -347,13 +347,17 @@ function getSeedListForRegion(regionName) {
 
 function plotsAndSeedsUpdate() {
 
-    Promise.all([getOwnedPlots(ACCOUNT),getRentedPlots(ACCOUNT), getSeeds(ACCOUNT), getSeeds(ACCOUNT, 'South America')]).then( (values) => {
-        let [ownedPlots, rentedPlots, seeds, seedsSA] = values
+    Promise.all([getOwnedPlots(ACCOUNT),
+                 getRentedPlots(ACCOUNT),
+                 getSeeds(ACCOUNT, 'Asia'),
+                 getSeeds(ACCOUNT, 'Jamaica'),
+                 getSeeds(ACCOUNT, 'Africa'),
+                 getSeeds(ACCOUNT, 'Afghanistan'),
+                 getSeeds(ACCOUNT, 'Mexico'),
+                 getSeeds(ACCOUNT, 'South America')]).then( (values) => {
+        let [ownedPlots, rentedPlots, seedsAsia, seedsJamaica, seedsAfrica, seedsAfghan, seedsMex, seedsSA] = values
 
-        seeds = seeds.data.result
-        seedsSA = seedsSA.data.result
-
-        seeds = seeds.concat(seedsSA)
+        var seeds = [].concat(seedsSA).concat(seedsAsia).concat(seedsJamaica).concat(seedsAfrica).concat(seedsAfghan).concat(seedsMex)
         console.log(`Seeds: ${seeds.length}`)
 
         let allPlots = ownedPlots.concat(rentedPlots)
