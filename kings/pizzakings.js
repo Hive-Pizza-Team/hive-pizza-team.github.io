@@ -3,11 +3,16 @@
 // configuration vars
 const REFRESH_INTERVAL = 3 * 1000 // 3000 ms = 3 s
 const AVATAR_REFRESH_INTERVAL = 60 * 1000 // 60000 ms = 60s
+var AUTOREFRESH = true
 const DEFAULT_ACCOUNT = 'null'
 const rpc = 'https://api2.hive-engine.com/rpc/contracts';
 
 var urlParams = new URLSearchParams(window.location.search)
 var ACCOUNT = urlParams.has('account') ? urlParams.get('account').toLowerCase().trim() : DEFAULT_ACCOUNT
+
+if (urlParams.has('norefresh')) {
+    AUTOREFRESH = false
+}
 
 if (ACCOUNT === DEFAULT_ACCOUNT) {
     ACCOUNT = window.prompt('Enter Hive account name:')
@@ -324,7 +329,7 @@ function getSeedListForRegion(regionName) {
     if (regionName === 'Asia') {
         return ['Aceh','Thai','Chocolate Thai']
     } else if (regionName === 'Jamaica') {
-        return ['Lambs Bread','Kings Bread']
+        return ['Lamb’s Bread','King’s Bread']
     } else if (regionName === 'Africa') {
         return ['Swazi Gold','Kilimanjaro','Durban Poison','Malawi']
     } else if (regionName === 'Afghanistan') {
@@ -465,7 +470,7 @@ function plotsAndSeedsUpdate() {
                     for (seedName of getSeedListForRegion(regionName)) {
                         for (seedID in seedsByID) {
                             let seed = seedsByID[seedID]
-                            
+
                             if (seed.properties.NAME === seedName && !plantedSeedIDs.includes(seed._id) && seed.properties.WATER !== 0) {
                                 seedList += `<a class="dropdown-item" data-plot-id="${plot._id}" data-seed-id="${seedID}">${seedName} - ID:${seedID} - W:${seed.properties.WATER} HKWATER - Y:${seed.properties.PR} BUDS - T:${seed.properties.SPT} Days</a>`
                             }
@@ -825,8 +830,11 @@ function avatarsUpdate() {
 
 // Fetch data on load and then refresh every N ms.
 plotsAndSeedsUpdate()
-window.setInterval(plotsAndSeedsUpdate, REFRESH_INTERVAL)
 avatarsUpdate()
-window.setInterval(avatarsUpdate, AVATAR_REFRESH_INTERVAL)
 
+
+if (AUTOREFRESH) {
+    window.setInterval(plotsAndSeedsUpdate, REFRESH_INTERVAL)
+    window.setInterval(avatarsUpdate, AVATAR_REFRESH_INTERVAL)
+}
 
