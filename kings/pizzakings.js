@@ -62,40 +62,41 @@ function getRentedPlots(account) {
     })
 }
 
-function getSeeds(account) {
-    return new Promise((resolve, reject) => {
-        let query = ''
-        if (account) {
-            query = {'id': 1,
-               'jsonrpc': '2.0',
-               'method': 'find',
-               'params': {
-                    'contract': 'nft',
-                    'table': 'HKFARMinstances',
-                    'query': {
-                        'properties.TYPE': 'seed',
-                        'account': account
-                    }
-                }}
-        } else {
-            query = {'id': 1,
-               'jsonrpc': '2.0',
-               'method': 'find',
-               'params': {
-                    'contract': 'nft',
-                    'table': 'HKFARMinstances',
-                    'query': {
-                        'properties.TYPE': 'seed'
-                    }
-                }}
-        }
-        axios.post(rpc, query).then((result) => {
-            return resolve(result.data.result)
-        }).catch((err) => {
-            console.log(err)
-            return reject(err)
-        })
-    })
+
+function getSeeds(account, region) {
+    let query = ''
+    if (account) {
+        query = {'id': 1,
+           'jsonrpc': '2.0',
+           'method': 'find',
+           'params': {
+                'contract': 'nft',
+                'table': 'HKFARMinstances',
+                'query': {
+                    'properties.TYPE': 'seed',
+                    'account': account
+                }
+            }}
+    } else {
+        query = {'id': 1,
+           'jsonrpc': '2.0',
+           'method': 'find',
+           'params': {
+                'contract': 'nft',
+                'table': 'HKFARMinstances',
+                'query': {
+                    'properties.TYPE': 'seed'
+                }
+            }}
+    }
+
+    if (typeof region !== 'undefined') {
+        console.log(region)
+        var seedsForRegion = getSeedListForRegion(region)
+        query.params.query['$or'] = [{'properties.NAME' : seedsForRegion[0]}, {'properties.NAME' : seedsForRegion[1]}]
+    }
+
+    return axios.post(rpc, query)
 }
 
 
@@ -344,10 +345,16 @@ function getSeedListForRegion(regionName) {
 }
 
 
-
 function plotsAndSeedsUpdate() {
-    Promise.all([getOwnedPlots(ACCOUNT),getRentedPlots(ACCOUNT),getSeeds(ACCOUNT)]).then( (values) => {
-        let [ownedPlots, rentedPlots, seeds] = values
+
+    Promise.all([getOwnedPlots(ACCOUNT),getRentedPlots(ACCOUNT), getSeeds(ACCOUNT), getSeeds(ACCOUNT, 'South America')]).then( (values) => {
+        let [ownedPlots, rentedPlots, seeds, seedsSA] = values
+
+        seeds = seeds.data.result
+        seedsSA = seedsSA.data.result
+
+        seeds = seeds.concat(seedsSA)
+        console.log(`Seeds: ${seeds.length}`)
 
         let allPlots = ownedPlots.concat(rentedPlots)
 
