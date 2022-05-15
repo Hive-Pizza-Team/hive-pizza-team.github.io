@@ -90,10 +90,14 @@ function getSeeds(account, region) {
             }}
     }
 
+    // filter seeds by region
     if (typeof region !== 'undefined') {
-        console.log(region)
         var seedsForRegion = getSeedListForRegion(region)
-        query.params.query['$or'] = [{'properties.NAME' : seedsForRegion[0]}, {'properties.NAME' : seedsForRegion[1]}]
+        var seedNameFilter = []
+        for (seedName of seedsForRegion) {
+            seedNameFilter.push({'properties.NAME' : seedName})
+        }
+        query.params.query['$or'] = seedNameFilter
     }
 
     return axios.post(rpc, query).then((result) => {return result.data.result})
