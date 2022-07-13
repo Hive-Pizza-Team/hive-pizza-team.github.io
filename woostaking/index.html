@@ -38,7 +38,7 @@ function getOwnedCards(account) {
 }
 
 function stakeCards(wallet, cards) {
-    if (!cards) {
+    if (cards.length == 0) {
         window.alert('Error! No cards to stake.')
         return
     }
