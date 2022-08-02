@@ -5,7 +5,7 @@ const REFRESH_INTERVAL = 3 * 1000 // 3000 ms = 3 s
 const AVATAR_REFRESH_INTERVAL = 60 * 1000 // 60000 ms = 60s
 var AUTOREFRESH = true
 const DEFAULT_ACCOUNT = 'null'
-const rpc = 'https://api2.hive-engine.com/rpc/contracts';
+const rpc = 'https://api.hive-engine.com/rpc/contracts';
 
 var urlParams = new URLSearchParams(window.location.search)
 var ACCOUNT = urlParams.has('account') ? urlParams.get('account').toLowerCase().trim() : DEFAULT_ACCOUNT
